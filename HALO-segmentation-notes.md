@@ -38,7 +38,7 @@ are noted below each flight segment.
 - If roll angle was close to 0&deg; the whole time, the segment is also of kind "straight_leg".
 
 #### radar_calibration_wiggle:
-- Maneuver typically conducted during straight legs, where the aircraft tilts to a roll angle of first -20&deg; and then +20�.
+- Maneuver typically conducted during straight legs, where the aircraft tilts to a roll angle of first -20&deg; and then +20&deg;.
 - If conducted during a straight leg, the straight leg is split into three flight segments:
 1.) straight_leg, 2.) radar_cal_wiggle, 3.) straight_leg.
 - Segments start and end at about 0&deg; roll angle.
