@@ -3,7 +3,7 @@
 A flight segment is a period of some constant characteristics during a RF. For example during a
 circle segment, the roll angle and the temporal change in aircraft heading can be assumed to roughly be
 constant. The circles during ORCESTRA were especially associated with the regular launch of
-dropsondes, most of the time 12 per circle, every 30 � heading. Such general characteristics
+dropsondes, most of the time 12 per circle, every 30&deg; heading. Such general characteristics
 of the various flight segments and a first idea about the flight patterns from the flight
 reports (available [here](https://github.com/orcestra-campaign/book/tree/main/orcestra_book/reports)) are used as a starting point
 to approach the flight phase segmentation. The BAHAMAS datasets and the dropsonde launch
@@ -28,32 +28,32 @@ are noted below each flight segment.
 - the circle period is defined by a constant roll angle of 2-3 degrees (plus or minus depending on turning clockwise or counter-clockwise) for the standard circle of about 200km diameter. The smaller ATR circle typically has a roll angle of 3-5 degree depending and varying with the wind speed and direction at the respective altitude.
 
 #### straight_leg:
-- Period with constant aircraft heading and close to 0� roll angle (max. 3� roll for short periods).
+- Period with constant aircraft heading and close to 0&deg; roll angle (max. 3&deg; roll for short periods).
 - Straight legs were flown with various purposes, which are more closely described by the straight leg
 "name"-Parameter in the YAML files and is in some cases also expressed by additional entries in the segment "kinds" attribute.
 
 #### lidar_calibration:
 - Maneuver typically conducted during the final descent of most RFs in FL160.
 - Defined as the period of the aircraft being in FL160.
-- If roll angle was close to 0� the whole time, the segment is also of kind "straight_leg".
+- If roll angle was close to 0&deg; the whole time, the segment is also of kind "straight_leg".
 
 #### radar_calibration_wiggle:
-- Maneuver typically conducted during straight legs, where the aircraft tilts to a roll angle of first -20� and then +20�.
+- Maneuver typically conducted during straight legs, where the aircraft tilts to a roll angle of first -20&deg; and then +20&deg;.
 - If conducted during a straight leg, the straight leg is split into three flight segments:
 1.) straight_leg, 2.) radar_cal_wiggle, 3.) straight_leg.
-- Segments start and end at about 0� roll angle.
+- Segments start and end at about 0&deg; roll angle.
 
 #### radar_calibration_tilted:
-- Maneuver typically conducted at the end of a straight leg, where a narrow circle pattern with a constant 10� bank is flown.
-- A constant roll angle of about 10� is used to define the period of a "radar_cal_tilted" segment.
+- Maneuver typically conducted at the end of a straight leg, where a narrow circle pattern with a constant 10&deg; bank is flown.
+- A constant roll angle of about 10&deg; is used to define the period of a "radar_cal_tilted" segment.
 
 #### baccardi_calibration:
-- Defined by 4 turns indicated by roll angles of about 25� (1 turn: -25�, 3 turns: +25�).
+- Defined by 4 turns indicated by roll angles of about 25&deg; (1 turn: -25&deg;, 3 turns: +25&deg;).
 
 ## For developers
 The following workflow for generating the flight segmentation YAML files is suggested:
 
-1. Install the requirements noted [here]("scripts/requirements.txt") as well as the [IPFS Desktop App](https://docs.ipfs.tech/install/ipfs-desktop/), e.g. on Mac via `brew install --cask ipfs`.
+1. Install the requirements noted [here](scripts/requirements.txt) as well as the [IPFS Desktop App](https://docs.ipfs.tech/install/ipfs-desktop/), e.g. on Mac via `brew install --cask ipfs`.
 2. Use the ipython notebook `scripts/segmentation_template.ipynb` to do a rough segmentation by zooming into the bokeh plots of roll angle, altitude or other measures.
 3. Create a YAML file for the respective flight and add the respective `start` and `end` times and segments to it. For an example, have a look at `flight_segment_files/HALO-20240813a.yaml`
 4. test and check the YAML file using the `scripts/report.py`: `python3 scripts/report.py flight_segment_files/HALO-20240813a.yaml reports/HALO-20240813a.html`. This will create an HTML file that you can open in any browser and check the details of the flight segments.
