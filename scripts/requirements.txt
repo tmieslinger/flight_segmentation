@@ -5,7 +5,7 @@ pyyaml
 xarray
 requests
 aiohttp
-ipfsspec
+ipfsspec==0.5.0
 intake
 intake-xarray
 orcestra
