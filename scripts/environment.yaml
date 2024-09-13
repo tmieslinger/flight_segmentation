@@ -6,7 +6,6 @@ dependencies:
   - xarray
   - requests
   - aiohttp
-  - ipfsspec
   - intake<2.0.0
   - intake-xarray
   - coloredlogs
@@ -19,3 +18,4 @@ dependencies:
   - pip:
     - tqdm
     - orcestra
+    - ipfsspec==0.5.0
