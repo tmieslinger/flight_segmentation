@@ -1,0 +1,21 @@
+name: flight_segment
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.12
+  - xarray
+  - requests
+  - aiohttp
+  - ipfsspec
+  - intake<2.0.0
+  - intake-xarray
+  - coloredlogs
+  - bokeh
+  - cartopy
+  - hvplot
+  - ipykernel
+  - jupyter
+  - pyyaml
+  - pip:
+    - tqdm
+    - orcestra
