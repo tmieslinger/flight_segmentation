@@ -25,7 +25,7 @@ segment "kinds" in the YAML files. The criteria to determine the start- and end-
 are noted below each flight segment.
 
 #### circle:
-- the circle period is defined by a constant roll angle of 2-3 degrees (plus or minus depending on turning clockwise or counter-clockwise) for the standard circle of about 200km diameter. The smaller ATR circle typically has a roll angle of 3-5 degree depending and varying with the wind speed and direction at the respective altitude.
+- The circle period is defined by a constant roll angle of 2-3 degrees (plus or minus depending on turning clockwise or counter-clockwise) for the standard circle of about 200km diameter. The smaller ATR circle typically has a roll angle of 3-5 degree depending and varying with the wind speed and direction at the respective altitude.
 
 #### straight_leg:
 - Period with constant aircraft heading and close to 0&deg; roll angle (max. 3&deg; roll for short periods).
