@@ -20,7 +20,7 @@ The segmentation copies and adapts many ideas from the [flight segmentation](htt
 Following are names of segments assembled from a range of platforms describing broad sampling strategies. Many will contain subsets
 e.g. `cloud` segments will likely contain `subcloud layer` and `cloud layer` segments.
 Data providers are encouraged to use these names, especially those in the first, where applicable.
-Feel free to add the the list (e.g. with a Github pull request) if needed.
+Feel free to add to the list (e.g. with a Github pull request) if needed.
 * ground
 * transit
 * circle
