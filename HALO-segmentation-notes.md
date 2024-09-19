@@ -1,28 +1,20 @@
 ## Methodology to determine flight segments for HALO
 
-A flight segment is a period of some constant characteristics during a RF. For example during a
-circle segment, the roll angle and the temporal change in aircraft heading can be assumed to roughly be
-constant. The circles during ORCESTRA were especially associated with the regular launch of
-dropsondes, most of the time 12 per circle, every 30&deg; heading. Such general characteristics
-of the various flight segments and a first idea about the flight patterns from the flight
-reports (available [here](https://github.com/orcestra-campaign/book/tree/main/orcestra_book/reports)) are used as a starting point
-to approach the flight phase segmentation. The BAHAMAS datasets and the dropsonde launch
-times are then analysed to consistently determine the specific flight segment timestamps.
+A flight segment is a period of some constant characteristics during a RF.
+For example during a circle segment, the roll angle and the temporal change in aircraft heading can be assumed to roughly be constant.
+The circles during ORCESTRA were especially associated with the regular launch of dropsondes, most of the time 12 per circle, every 30&deg; heading.
+Such general characteristics of the various flight segments and a first idea about the flight patterns from the flight reports (available [here](https://github.com/orcestra-campaign/book/tree/main/orcestra_book/reports)) are used as a starting point to approach the flight phase segmentation.
+The BAHAMAS datasets and the dropsonde launch times are then analysed to consistently determine the specific flight segment timestamps.
 
-To precisely determine the periods of flight segments, a rather manual approach is taken where the
-flight reports and the altitude, as well as roll and pitch angles are used as first indicators to determine the segment periods.
-The exact times are then found iteratively by the dataset creator
-with a set of standardized plots of the BAHAMAS data and after undergoing a set of tests that depend on the
-particular "kinds" of the flight segment. Because of this simple procedure the only relevant place that
-denotes the segment times are the YAML segmentation files. The reference or "true" segment times are defined to always be
-in these files! Users of the YAML segmentation files are encouraged to use these files with any tool of their choice and may suggest
-adjustments or additions by simply uploading their new version of a YAML file via a Pull Request on GitHub, which may then be
-reviewed and accepted to work towards new versions of this dataset. It is expected that users of different sub-communities
-may have different ideas of how segments are defined, so feel encouraged to bring up your suggestions!
+To precisely determine the periods of flight segments, a rather manual approach is taken where the flight reports and the altitude, as well as roll and pitch angles are used as first indicators to determine the segment periods.
+The exact times are then found iteratively by the dataset creator with a set of standardized plots of the BAHAMAS data and after undergoing a set of tests that depend on the particular "kinds" of the flight segment.
+Because of this simple procedure the only relevant place that denotes the segment times are the YAML segmentation files.
+The reference or "true" segment times are defined to always be in these files!
+Users of the YAML segmentation files are encouraged to use these files with any tool of their choice and may suggest adjustments or additions by simply uploading their new version of a YAML file via a Pull Request on GitHub, which may then be reviewed and accepted to work towards new versions of this dataset.
+It is expected that users of different sub-communities may have different ideas of how segments are defined, so feel encouraged to bring up your suggestions!
 
-The following flight segments are identified, where the names directly correspond to entries in
-segment "kinds" in the YAML files. The criteria to determine the start- and end-times of the segments
-are noted below each flight segment as well as naming conventions for the `segement_id` and `name` attribute.
+The following flight segments are identified, where the names directly correspond to entries in segment "kinds" in the YAML files.
+The criteria to determine the start- and end-times of the segments are noted below each flight segment as well as naming conventions for the `segement_id` and `name` attribute.
 Start- and end-times of flight segments should be defined to the second.
 
 #### circle:
