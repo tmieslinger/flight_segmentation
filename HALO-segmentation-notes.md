@@ -32,7 +32,7 @@ Start- and end-times of flight segments should be defined to the second.
 #### ec_track:
 - Period with constant aircraft heading and close to 0&deg; roll angle (max. 3&deg; roll for short periods).
 - Straight leg along the Earthcare track.
-- Segment ID: `<FLIGHT_ID>_ect<XX>`, where `<XX>` marks the number of the erathcare track segment. Example: `HALO-20240909a_ect01`
+- No unique segment ID as it uses segment IDs from straigth legs.
 - Naming convention: `EC_track_northward`, `EC_track_southward`.
 
 #### lidar_calibration:
