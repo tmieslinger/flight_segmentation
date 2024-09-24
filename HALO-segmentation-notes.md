@@ -29,11 +29,11 @@ Start- and end-times of flight segments should be defined to the second.
 - Segment ID: `<FLIGHT_ID>_sl<XX>`, where `<XX>` marks the straight leg number. Example: `HALO-20240909a_sl01`
 - Naming convention: `ferry_ascent`, `ferry_descent`, `ferry_const_alt`, `from_<NAME1>_to_<NAME2>`, where `NAME1` and `NAME2` are the names of the start and end of that leg. Example `from_c01_to_c02`.
 
-#### ec_underpass:
+#### ec_track:
 - Period with constant aircraft heading and close to 0&deg; roll angle (max. 3&deg; roll for short periods).
 - Straight leg along the Earthcare track.
-- Segment ID: `<FLIGHT_ID>_ecu<XX>`, where `<XX>` marks the number of the erathcare underpass. Example: `HALO-20240909a_ecu01`
-- Naming convention: `EC_underpass_northward`, `EC_underpass_southward`.
+- No unique segment ID as it uses segment IDs from straigth legs.
+- Naming convention: `EC_track_northward`, `EC_track_southward`.
 
 #### lidar_calibration:
 - Maneuver typically conducted during the final descent of most RFs in FL160.
@@ -61,15 +61,15 @@ Start- and end-times of flight segments should be defined to the second.
 - Segment ID: `<FLIGHT_ID>_bc<XX>`, where `<XX>` marks the bacardi calibration maneuver number. Example: `HALO-20240909a_bc01`
 - Naming convention: `bacardi_calibration`
 
-#### ec_meeting_point:
+#### ec_underpass:
 - Defined as the time when the EARTHCARE satellite is closest to HALO
 - Segment ID: `<FLIGHT_ID>_ec`. Example: `HALO-20240909a_ec`
-- Naming convention: `ec_meeting_point`
+- Naming convention: `ec_underpass`
 
-#### pace_meeting_point:
+#### pace_underpass:
 - Defined as the time when the PACE satellite is closest to HALO
 - Segment ID: `<FLIGHT_ID>_pace`. Example: `HALO-20240909a_pace`
-- Naming convention: `pace_meeting_point`
+- Naming convention: `pace_underpass`
 
 ## For developers
 The following workflow for generating the flight segmentation YAML files is suggested:
