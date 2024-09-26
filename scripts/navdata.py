@@ -12,17 +12,18 @@ def get_navdata_HALO(flight):
     from intake import open_catalog
     import orcestra.postprocess.level0
 
-    root = "ipfs://QmcqgdpTAXRJFnKonSUWDDbpJfiLbq3275GHn84sizNEfm"
-    ds = xr.open_dataset(f"{root}/products/HALO/bahamas/ql/{flight}.zarr", engine="zarr")#.pipe(orcestra.postprocess.level0.bahamas)
+    root = "ipns://latest.orcestra-campaign.org"
+    #ds = xr.open_dataset(f"{root}/products/HALO/position_attitude/{flight}.zarr", engine="zarr")#.pipe(orcestra.postprocess.level0.bahamas)
+    ds = xr.open_dataset(f"{root}/products/HALO/position_attitude/{flight}.zarr", engine="zarr")
 
     return xr.Dataset({
         "time": ds.time,
-        "lat": ds.IRS_LAT,
-        "lon": ds.IRS_LON,
-        "alt": ds.IRS_ALT,
-        "roll": ds.IRS_PHI,
-        "pitch": ds.IRS_THE,
-        "heading": ds.IRS_HDG,
+        "lat": ds.lat,
+        "lon": ds.lon,
+        "alt": ds.alt,
+        "roll": ds["roll"],
+        "pitch": ds.pitch,
+        "heading": ds.heading,
     })
 
 NAVDATA_GETTERS = {

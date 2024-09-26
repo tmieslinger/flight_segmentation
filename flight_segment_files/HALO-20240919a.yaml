@@ -1,0 +1,72 @@
+nickname: foo
+mission: ORCESTRA
+platform: HALO
+flight_id: HALO-20240919a
+segments:
+- kinds:
+  - straight_leg
+  name: super curtain
+  segment_id: HALO-20240919a_l1
+  start: 2024-09-19 14:44:00
+  end: 2024-09-19 14:56:37
+  irregularities: []
+  dropsondes:
+    GOOD: []
+    BAD: []
+    UGLY: []
+- kinds:
+  - circle
+  name: circle 1
+  segment_id: HALO-20240919a_c1
+  start: 2024-09-19 12:35:30
+  end: 2024-09-19 13:30:35
+  irregularities: []
+  dropsondes:
+    GOOD: []
+    BAD: []
+    UGLY: []
+- kinds:
+  - circle
+  name: circle 2
+  segment_id: HALO-20240919a_c2
+  start: 2024-09-19 13:57:32
+  end: 2024-09-19 14:53:30
+  irregularities: []
+  dropsondes:
+    GOOD: []
+    BAD: []
+    UGLY: []
+- kinds:
+  - circle
+  name: circle 3 
+  segment_id: HALO-20240919a_c3
+  start: 2024-09-19 15:02:10
+  end: 2024-09-19 15:33:20
+  irregularities: []
+  dropsondes:
+    GOOD: []
+    BAD: []
+    UGLY: []
+- kinds:
+  - circle
+  name: circle 4
+  segment_id: HALO-20240919a_c4
+  start: 2024-09-19 16:29:30
+  end: 2024-09-19 17:25:40
+  irregularities: []
+  dropsondes:
+    GOOD: []
+    BAD: []
+    UGLY: []
+- kinds:
+  - circle
+  name: circle 5
+  segment_id: HALO-20240919a_c5
+  start: 2024-09-19 18:04:30
+  end: 2024-09-19 19:04:30
+  irregularities: []
+  dropsondes:
+    GOOD: []
+    BAD: []
+    UGLY: []
+
