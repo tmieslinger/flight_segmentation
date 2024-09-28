@@ -19,6 +19,7 @@ Start- and end-times of flight segments should be defined to the second.
 
 #### circle:
 - The circle period is defined by a constant roll angle of 2-3 degrees (plus or minus depending on turning clockwise or counter-clockwise) for the standard circle of about 200km diameter. The smaller ATR circle typically has a roll angle of 3-5 degree depending and varying with the wind speed and direction at the respective altitude.
+- Circle dropsondes were sometimes droped before/after the roll angle reached its circle value in which case the launch time of the sonde  marks the beginning/end of the circle period (minus/plus a few seconds, so that the sonde is included in the circle segment). 
 - Segment ID: `<FLIGHT_ID>_c<XX>`, where `<XX>` marks the circle number. Example: `HALO-20240909a_c01`
 - Naming: `outside_itcz_north`, `outside_itcz_south`, `inside_itcz`, `edge_itcz_north`, `edge_itcz_south`
 
