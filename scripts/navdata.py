@@ -10,8 +10,9 @@ def get_navdata_HALO(flight):
     """
     import xarray as xr
 
-    root = "ipns://latest.orcestra-campaign.org"
-    return xr.open_dataset(f"{root}/products/HALO/position_attitude/{flight}.zarr", engine="zarr").reset_coords().resample(time="1s").mean()
+    #root = "ipns://latest.orcestra-campaign.org/products/HALO/position_attitude"
+    root = "ipfs://QmP1ragFLB3jbjBj9tU3piitkADPqBUjqgydhcFjFGXrii"
+    return xr.open_dataset(f"{root}/{flight}.zarr", engine="zarr").reset_coords().resample(time="1s").mean()
 
 NAVDATA_GETTERS = {
     "HALO": get_navdata_HALO,
