@@ -22,6 +22,7 @@ sonde_styles = {
     "GOOD": {"color": "green", "marker": "o"},
     "BAD": {"color": "red", "marker": "s"},
     "UGLY": {"color": "orange", "marker": "d"},
+    "UNKNOWN": {"color": "k", "marker": "x"},
 }
 
 env = Environment(
@@ -191,13 +192,33 @@ def plots_for_kinds(kinds):
             for plot in SPECIAL_PLOTS.get(kind, [])]
 
 
+def sonde_info_from_yaml(filehandle):
+    return yaml.load(filehandle, Loader=yaml.SafeLoader)
+
+def sonde_info_from_ipfs(flight_id):
+    import fsspec
+    import pandas as pd
+    root = "ipns://latest.orcestra-campaign.org/products/HALO/dropsondes/Level_1"
+    day_folder = root + "/" + flight_id
+    fs = fsspec.filesystem(day_folder.split(":")[0])
+    filenames = fs.ls(day_folder, detail=False)
+    datasets = [xr.open_dataset(fsspec.open_local("simplecache::ipns://" + filename), engine="netcdf4")
+                for filename in filenames]
+    return [ {
+        "launch_time": pd.Timestamp(d["launch_time"].values).to_pydatetime(warn=False),
+        "platform": "HALO",
+        "sonde_id": d.attrs["SondeId"],
+        "flag": "UNKNOWN",
+    }
+            for d in datasets]
+
 def _main():
     basedir = os.path.abspath(os.path.dirname(__file__))
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("infile")
     parser.add_argument("outfile")
-    parser.add_argument("-s", "--sonde_info", help="sonde info yaml file", default=os.path.join(basedir, "sondes.yaml"))
+    parser.add_argument("-s", "--sonde_info", help="sonde info yaml file", default=None)
     args = parser.parse_args()
 
     flightdata = yaml.load(open(args.infile), Loader=yaml.SafeLoader)
@@ -208,12 +229,11 @@ def _main():
     flight_id = flightdata.get("flight_id", "")
     platform = flightdata.get("platform", "")
 
-    if args.sonde_info is not None:
-        sonde_info = yaml.load(open(args.sonde_info), Loader=yaml.SafeLoader)
+    if args.sonde_info is None:
+        sonde_info = sonde_info_from_ipfs(flight_id)
     else:
-        sonde_info = []
-        global_warnings.append("no sonde_info is specified, using data from unified dataset")
-
+        sonde_info = sonde_info_from_yaml(open(args.sonde_info))
+    
     navdata = get_navdata(platform, flight_id).load()
 
     sonde_info = [s for s in sonde_info if s["platform"] == platform]
