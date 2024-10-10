@@ -1,45 +1,73 @@
-nickname: foo
-mission: ORCESTRA
-platform: HALO
 flight_id: HALO-20240813a
+takeoff: 2024-08-13 12:46:34
+landing: 2024-08-13 22:59:33
 segments:
 - kinds:
   - straight_leg
-  name: super curtain
-  segment_id: HALO-20240813a_l1
+  name: null
+  segment_id: HALO-20240813a_a7c3
   start: 2024-08-13 14:44:00
   end: 2024-08-13 14:56:37
   irregularities: []
-  dropsondes:
-    GOOD: []
-    BAD: []
-    UGLY: []
+- kinds:
+  - straight_leg
+  - ec_track
+  name: EC track low leg
+  segment_id: HALO-20240813a_793d
+  start: 2024-08-13 15:32:18
+  end: 2024-08-13 15:52:22
+  irregularities: []
+- kinds:
+  - straight_leg
+  - ec_track
+  name: EC track mid leg
+  segment_id: HALO-20240813a_fbc8
+  start: 2024-08-13 15:57:05
+  end: 2024-08-13 17:01:53
+  irregularities: []
+- kinds:
+  - straight_leg
+  - ec_track
+  name: EC track high leg
+  segment_id: HALO-20240813a_c8f6
+  start: 2024-08-13 17:05:35
+  end: 2024-08-13 17:13:36
+  irregularities: []
+- kinds:
+  - straight_leg
+  name: straight leg south
+  segment_id: HALO-20240813a_1d55
+  start: 2024-08-13 17:16:49
+  end: 2024-08-13 17:19:35
+  irregularities: []
 - kinds:
   - circle
   name: circle south
-  segemnt_id: HALO-20240813a_cs
-  start: 2024-08-13 17:22:00
-  end: 2024-08-13 18:26:00
+  segment_id: HALO-20240813a_adeb
+  start: 2024-08-13 17:21:20
+  end: 2024-08-13 18:23:20
   irregularities:
-    - short deviation from circle track due to deep convective system
+  - deviation from circle track due to deep convection between 18:06:02 - 18:12:08
 - kinds:
   - circle
   name: circle mid
-  segment_id: HALO-20240813a_cm
-  start: 2024-08-13 19:16:00
-  end: 2024-08-13 20:13:40
+  segment_id: HALO-20240813a_0c75
+  start: 2024-08-13 19:15:37
+  end: 2024-08-13 20:13:48
   irregularities: []
 - kinds:
   - circle
   name: circle north
-  segment_id: HALO-20240813a_cn
-  start: 2024-08-13 21:10:30
-  end: 2024-08-13 22:07:30
-  irregularities: []
+  segment_id: HALO-20240813a_7470
+  start: 2024-08-13 21:09:04
+  end: 2024-08-13 22:07:31
+  irregularities:
+  - early circle start due to 1st sonde. Roll angle stable after 21:10:04
 - kinds:
   - circle
-  name: circle ATR
-  segment_id: HALO-20240813a_ca
-  start: 2024-08-13 22:22:00
-  end: 2024-08-13 22:59:00
+  - circle_atr
+  name: circle with ATR coordination and 72km radius
+  segment_id: HALO-20240813a_63f7
+  start: 2024-08-13 22:21:00
+  end: 2024-08-13 22:59:14
   irregularities: []
