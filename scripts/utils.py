@@ -50,6 +50,7 @@ def get_takeoff_landing(flight_id, ds):
     Detect take-off and landing for the airport on Sal and Barbados
     which are located at about 89m and 8m above WGS84 respectively.
     """
+    import numpy as np
     if ds.time[0].values > np.datetime64("2024-09-07T00:00:00"):
         airport_wgs84 = 9
     else:
@@ -92,5 +93,6 @@ def seg2yaml(flight_id, ds, segments):
                           "start": to_dt(s["slice"].start),
                           "end": to_dt(s["slice"].stop),
                           "irregularities": s.get("irregularities", []),
+                          "comments": s.get("comments", []),
                          } for s in segments]
            }
