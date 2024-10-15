@@ -45,6 +45,20 @@ def to_dt(dt64):
     import pandas as pd
     return pd.Timestamp(dt64).to_pydatetime(warn=False)
 
+def get_takeoff_landing(flight_id, ds):
+    """
+    Detect take-off and landing for the airport on Sal and Barbados
+    which are located at about 89m and 8m above WGS84 respectively.
+    """
+    if ds.time[0].values > np.datetime64("2024-09-07T00:00:00"):
+        airport_wgs84 = 9
+    else:
+        airport_wgs84 = 90
+    takeoff = ds["time"].where(ds.alt > airport_wgs84, drop=True)[0].values
+    landing = ds["time"].where(ds.alt > airport_wgs84, drop=True)[-1].values
+    duration = (landing - takeoff).astype("timedelta64[m]").astype(int)
+    return takeoff, landing, duration
+
 def segment_hash(segment):
     import hashlib
     return hashlib.sha256(f"{segment.start}+{segment.stop}".encode("ascii")).hexdigest()[-4:]
@@ -68,9 +82,10 @@ def parse_segment(segment):
 
 def seg2yaml(flight_id, ds, segments):
     segments = [parse_segment(s) for s in segments]
+    takeoff, landing, _ = get_takeoff_landing(flight_id, ds)
     return {"flight_id": flight_id,
-            "takeoff": to_dt(ds["time"].where(ds.alt > 8, drop=True)[0].values),
-            "landing": to_dt(ds["time"].where(ds.alt > 8, drop=True)[-1].values),
+            "takeoff": to_dt(takeoff),
+            "landing": to_dt(landing),
             "segments": [{"kinds": s.get("kinds", []),
                           "name": s.get("name", None),
                           "segment_id": f"{flight_id}_{segment_hash(s["slice"])}",
