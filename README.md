@@ -105,7 +105,7 @@ The flight segmentation workflow broadly consists of three phases:
 2. Review of the segmentation in pairs (the person who performed the segmentation + one other colleague)
 3. Handover of the final flight segmentation (along with suggestions for how to improve the flight report where necessary) to the corresponding flight-PI for cross-checking.
 
-## For developers
+### For developers
 The following workflow for generating the flight segmentation YAML files is suggested:
 
 1. Install the requirements noted [here](scripts/requirements.txt) as well as the [IPFS Desktop App](https://docs.ipfs.tech/install/ipfs-desktop/), e.g. on Mac via `brew install --cask ipfs`.
