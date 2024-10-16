@@ -10,11 +10,13 @@ All segments belonging to a specific research flight are specified in a yaml-fil
 Every yaml-file begins with a header consisting of the flight's `nickname` taken from [flight reports](https://github.com/orcestra-campaign/book/tree/main/orcestra_book/reports) if available, `mission` (ORCESTRA), `platform` (HALO, ATR, METEOR,..), `flight_id` (e.g. HALO-20240813a), and `segments`. The latter lists all identified flight segments.
 
 The general structure of a segment within the yaml files looks as follows:
-- `kinds`: Can be thought of as tags which label coherent characteristics of the flight segment. See a list of all tags currently in use below.
-- `name`: Short (1 - 3 words) qualitative description of the segment, does not have to be unique
+Mandatory components:
 - `segment_id`: unique identifier of the segment, constructed as the combination of the `flight_id` and the last four digits of a hash computed from the start and end time of the segment
 - `start`: start time of the segment in format `YYYY-MM-DD HH:MM:SS`, e.g. 2024-08-13 14:56:37. 
 - `end`: end time of the segment in same format as start time. 
+Optional components:
+- `kinds`: Can be thought of as tags which label coherent characteristics of the flight segment. See a list of all tags currently in use below.
+- `name`: Short (1 - 3 words) qualitative description of the segment, does not have to be unique
 - `irregularities`: lists irregularities such as deviations from envisioned flight track due to deep convection, or circles in which no sondes were dropped. Generally meant to be a free text field for proper explanations, this category may contain some standardized *irregularity tags* (**to be decided on**) for automatic checking, and these should be prepended to the explanatory string of the irregularity.
 - `comments`: lists custom comments such as the distance to the exact EC overpass position in the case of an `ec_overpass` segment
 
