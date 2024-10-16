@@ -68,7 +68,7 @@ Kinds may or may not apply/be adopted for all platforms. For version 1 of the se
 - short-term deviations of the roll angle can occur due to turbulence and extreme cases should be mentioned as irregularities; strong deviations my also be radar calibration maneuvers in which case they need to be listed as a separate `radar_calibration` segment.
 - while segments in which the aircraft was ascending or descending are often of kind `straight_leg`, `straight_leg` segments with roughly constant altitude need to be separated from those with continuous ascent/descent.
 
-#### ec_track:
+### ec_track:
 - straight leg along the EarthCARE track
 
 ### ascent:
