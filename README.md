@@ -99,7 +99,7 @@ Kinds may or may not apply/be adopted for all platforms. For version 1 of the se
 - defined as the time when HALO flies above or passes close by the Mindelo research station
 
 
-## Workflow - general overview
+## Workflow for HALO segmentation - general overview
 The flight segmentation workflow broadly consists of three phases:
 1. Segmentation of a flight
 2. Review of the segmentation in pairs (the person who performed the segmentation + one other colleague)
