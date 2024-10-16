@@ -93,7 +93,7 @@ Kinds may or may not apply/be adopted for all platforms. For version 1 of the se
 - defined as the time when HALO flies above or passes close by METEOR
 
 ### bco_overpass:
-- defined as the time when HALO is almost exactly above the Barbados Cloud Observatory (BCO)
+- defined as the time when HALO flies above or passes close by the Barbados Cloud Observatory (BCO)
 
 ### mindelo_overpass:
 - defined as the time when HALO is almost exactly above the Mindelo research station
