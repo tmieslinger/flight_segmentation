@@ -1,6 +1,6 @@
 # Segmentation of flights during ORCESTRA
 
-The research flights during ORCESTRA can be divided into segments which are specific time intervals with coherent characteristics during a flight. The coherent characteristics, referred to as "kinds", either refer to the aircraft state during a flight maneuver (e.g. fairly contant heading, roll angle, and altitude on a straight leg as read out from the BAHAMAS data), or to colocated measurements (in space and time) with the EarthCARE (EC) satellite or other campaign platforms such as the METEOR research vessel. 
+The research flights during ORCESTRA can be divided into segments which are specific time intervals with coherent characteristics during a flight. The coherent characteristics, referred to as "kinds", either refer to the aircraft state during a flight maneuver (e.g. fairly contant heading, roll angle, and altitude on a straight leg as read out from the aircraft position and attitude data), or to colocated measurements (in space and time) with the EarthCARE (EC) satellite or other campaign platforms such as the METEOR research vessel. 
 
 The goal of the flight segmentation is to provide a commonly agreed upon, consistent, and easy-to-use subsampling functionality that can be used by reserachers who work with the ORCESTRA measurement data. For instance, all studies that analyse data taken on circular flight paths can use the flight segmentation to select segments of kind `circle`, and are thereby guaranteed to refer to the same commonly agreed upon subset of the campaign data.
 
