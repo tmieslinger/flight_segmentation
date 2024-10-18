@@ -8,6 +8,7 @@ dependencies:
   - aiohttp
   - intake<2.0.0
   - intake-xarray
+  - jupytext
   - coloredlogs
   - bokeh
   - cartopy
