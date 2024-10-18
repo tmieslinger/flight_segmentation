@@ -81,10 +81,12 @@ def parse_segment(segment):
         seg = {"slice": segment}
     return seg
 
-def seg2yaml(flight_id, ds, segments):
+def seg2yaml(flight_id, ds, segments, platform):
     segments = [parse_segment(s) for s in segments]
     takeoff, landing, _ = get_takeoff_landing(flight_id, ds)
-    return {"flight_id": flight_id,
+    return {"mission": "ORCESTRA",
+            "platform": platform,
+            "flight_id": flight_id,
             "takeoff": to_dt(takeoff),
             "landing": to_dt(landing),
             "segments": [{"kinds": s.get("kinds", []),
