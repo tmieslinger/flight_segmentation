@@ -66,7 +66,7 @@ def default_segment_plot(seg, sonde_tracks_by_flag, seg_before, seg_after):
     overview_ax.plot(seg_before.lon, seg_before.lat, color=color_before, alpha=.3, zorder=0)
     overview_ax.plot(seg_after.lon, seg_after.lat, color=color_after, alpha=.3, zorder=0)
 
-    plot_sondes(overview_ax, sonde_tracks_by_flag, zorder=5)
+    plot_sondes(overview_ax, sonde_tracks_by_flag, zorder=20)
 
     overview_ax.set_title("segment overview")
     overview_ax.set_xlabel("longitude [deg]")
@@ -100,7 +100,7 @@ def circle_detail_plot(seg, sonde_tracks_by_flag, seg_before, seg_after):
                  [seg.lat.data[-1], seg_after.lat.data[0]],
                  "--", color=color_connection, alpha=.3, zorder=0)
 
-    plot_sondes(zoom_ax, sonde_tracks_by_flag, zorder=5)
+    plot_sondes(zoom_ax, sonde_tracks_by_flag, zorder=20)
     lat_lims, lon_lims = start_end_lims(seg)
     zoom_ax.set_xlim(*lon_lims)
     zoom_ax.set_ylim(*lat_lims)
@@ -122,7 +122,7 @@ def straight_leg_detail_plot(seg, sonde_tracks_by_flag, seg_before, seg_after):
         ax.plot(seg.lon, seg.lat, "o-", color=color_at, zorder=10)
         ax.plot(seg_before.lon, seg_before.lat, "x-", color=color_before, alpha=.3, zorder=0)
         ax.plot(seg_after.lon, seg_after.lat, "x-", color=color_after, alpha=.3, zorder=0)
-        plot_sondes(ax, sonde_tracks_by_flag, zorder=5)
+        plot_sondes(ax, sonde_tracks_by_flag, zorder=20)
 
         ax.set_xlim(lon - .1, lon + .1)
         ax.set_ylim(lat - .1, lat + .1)
@@ -267,8 +267,8 @@ def _main():
 
         sonde_tracks_by_flag = {
             f: navdata.sel(time=[s["launch_time"] for s in sondes], method="nearest")
-            #for f, sondes in sondes_by_flag.items()
-            for f, sondes in manual_sondes_by_flag.items()
+            for f, sondes in sondes_by_flag.items()
+            #for f, sondes in manual_sondes_by_flag.items()
         }
 
         plot_data = []
