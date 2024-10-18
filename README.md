@@ -108,15 +108,16 @@ The flight segmentation workflow broadly consists of three phases:
 ### For developers
 The following workflow for generating the flight segmentation YAML files is suggested:
 
-1. Install the requirements noted [here](scripts/requirements.txt) as well as the [IPFS Desktop App](https://docs.ipfs.tech/install/ipfs-desktop/), e.g. on Mac via `brew install --cask ipfs`.
-2. Assign yourself to an open segmentation issue of this repository.
-3. Use a copy of the ipython notebook `scripts/segmentation_template.ipynb` to load the BAHAMAS and dropsonde data, and to determine the individual segments, using a mix of bokeh and other plots of roll angle, altitude, heading or other measures.
-4. Create and fill a YAML file for the respective flight either manually or automatically through the function provided in the notebook.
-5. test and check the YAML file using the `scripts/report.py`: `python3 scripts/report.py flight_segment_files/HALO-20240813a.yaml reports/HALO-20240813a.html`. This will create an HTML file that you can open in any browser and check the details of the flight segments.
-6. If necessary, adjust the times and further info in the notebook and update the YAML file. Redo step 4 until you are satisfied with all segments.
-7. Add your final YAML file to the repository by creating a pull request and assigning a reviewer. Don't add the `reports/*.html` files. THey will be generated automatically when you do the pull request and serve as a first check to validate the new YAML file.
-8. Review your yaml file together with one other colleague
-9. Check for inconsistencies with the flight report and send corresponding suggestions for improvement, together with your reviewed flight segmentation to the respective flight-PI for final feedback.
+1. Install the requirements noted [here](environment.yaml) as well as the [IPFS Desktop App](https://docs.ipfs.tech/install/ipfs-desktop/), e.g. on Mac via `brew install --cask ipfs`.
+2. Build a respective python environment, e.g. `mamba  env create -f environment.yaml`
+3. Assign yourself to an open segmentation issue of this repository.
+4. Use a copy of the file `scripts/segmentation_template.md`, open it as ipython notebook, and load the BAHAMAS and dropsonde data to determine the individual segments, using a mix of bokeh and other plots of roll angle, altitude, heading or other measures.
+5. Save your segments from the notebook to a YAML file.
+6. test and check the YAML file using the `scripts/report.py`: `python3 scripts/report.py flight_segment_files/HALO-20240813a.yaml reports/HALO-20240813a.html`. This will create an HTML file that you can be opened in any browser and check the details of the flight segments.
+7. If necessary, adjust the times and further info in the notebook and update the YAML file. Redo step 4 until you are satisfied with all segments.
+8. Add your final YAML file to the repository by creating a pull request and assigning a reviewer. Don't add the `reports/*.html` files. THey will be generated automatically when you do the pull request and serve as a first check to validate the new YAML file.
+9. Review your yaml file together with one other colleague
+10. Check for inconsistencies with the flight report and send corresponding suggestions for improvement, together with your reviewed flight segmentation to the respective flight-PI for final feedback.
 
 
 ## Reading the files
