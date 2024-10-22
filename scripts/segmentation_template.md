@@ -7,9 +7,9 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.16.4
   kernelspec:
-    display_name: flight_segment
+    display_name: Python 3 (ipykernel)
     language: python
-    name: flight_segment
+    name: python3
 ---
 
 # Flight segmentation template
@@ -28,10 +28,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from navdata import get_navdata_HALO
-from utils import get_sondes_l1, seg2yaml
+from utils import get_sondes_l1, seg2yaml, get_takeoff_landing
 ```
 
 ```python
+platform = "HALO"
 flight_id = "HALO-20240813a"
 ```
 
@@ -55,6 +56,10 @@ ds["alt"].hvplot()
 ```
 
 ```python
+ds["heading"].hvplot()
+```
+
+```python
 ds["roll"].hvplot()
 ```
 
@@ -62,19 +67,10 @@ ds["roll"].hvplot()
 On Barbads, the airport runway plus bumps make HALO move between 7.8-8m above WGS84, on Sal between 88.2-88.4m above WGS84. We therefore define the flight time such that altitude must be above 9m on Barbados and 90m on Sal.
 
 ```python
-if ds.time[0].values > np.datetime64("2024-09-07T00:00:00"):
-    airport_wgs84 = 9
-else:
-    airport_wgs84 = 90
-```
-
-```python
-takeoff = ds["time"].where(ds.alt > airport_wgs84, drop=True)[0].values
-landing = ds["time"].where(ds.alt > airport_wgs84, drop=True)[-1].values
-duration = (landing - takeoff).astype("timedelta64[m]").astype(int)
-print("take-off: ", takeoff)
-print("landing: ", landing)
-print(f"flight duration: {int(duration / 60)}:{int(duration % 60)}")
+takeoff, landing, duration = get_takeoff_landing(flight_id, ds)
+print("Takeoff time: " + str(takeoff))
+print("Landing time: " + str(landing))
+print(f"Flight duration: {int(duration / 60)}:{int(duration % 60)}")
 ```
 
 ### Plot flight track and dropsonde locations
@@ -205,10 +201,21 @@ print(f"Segment time: {seg[0].start} to {seg[0].stop}")
 print(f"Dropsonde launch times: {ds_drops.time.sel(time=seg_drops).values}")
 ```
 
+## Identify visually which straight_leg segments lie on EC track
+
+```python
+seg = sl1
+plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)))
+plt.plot(ds.lon.sel(time=seg[0]), ds.lat.sel(time=seg[0]), color = 'red')
+plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k")
+plt.xlabel("longitude / °")
+plt.ylabel("latitude / °");
+```
+
 ## Save segments to YAML file
 
 ```python
-yaml.dump(seg2yaml(flight_id, ds, segments),
+yaml.dump(seg2yaml(flight_id, ds, segments, platform),
           open(f"../flight_segment_files/{flight_id}.yaml", "w"),
           sort_keys=False)
 ```
