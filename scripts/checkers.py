@@ -46,6 +46,9 @@ class FlightChecker:
         if seg["end"] <= seg["start"]:
             yield "segment ends before it starts"
 
+        if seg["name"] is None:
+            yield "this segment is missing a name"
+
         if "irregularities" in seg:
             irregularities = seg["irregularities"]
             if not isinstance(irregularities, list):

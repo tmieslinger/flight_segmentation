@@ -107,7 +107,13 @@
             {% endfor %}
         </ul>
         {% endif %}
-
+        {% if segment.comments %}
+        <ul class="taglist">
+            {% for comments in segment.comments %}
+            <li class="tag irregularity">{{ comments }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
         {% for warning in segment.warnings %}
         <p class="warning">
             {{ warning }}
