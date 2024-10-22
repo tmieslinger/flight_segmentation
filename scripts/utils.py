@@ -9,7 +9,7 @@ __all__ = [
     "segment_hash",
     "event_hash",
     "parse_segment",
-    "seg2yaml",
+    "to_yaml",
 ]
 
 def get_sondes_l1(flight_id):
@@ -82,7 +82,7 @@ def parse_segment(segment):
         if len(segment) >= 3:
             seg["name"] = segment[2]
         if len(segment) >= 4:
-            seg["irregularities"] = segment[3]
+            seg["remarks"] = segment[3]
     elif isinstance(segment, dict):
         return segment
     else:
@@ -98,16 +98,18 @@ def to_yaml(platform, flight_id, ds, segments, events):
             "takeoff": to_dt(takeoff),
             "landing": to_dt(landing),
             "events": [{"event_id": f"{flight_id}_{event_hash(e)}",
-                        "name": e.get("name", None),
+                        "name": None,
                         "time": to_dt(e["time"]),
-                        "kinds": e.get("kinds", []),
-                        "remarks": e.get("remarks", []),
+                        "kinds": [],
+                        "remarks": [],
+                        **{k: v for k, v in e.items() if k not in ["event_id", "time"]},
                         } for e in events],
             "segments": [{"segment_id": f"{flight_id}_{segment_hash(s["slice"])}",
-                          "name": s.get("name", None),
+                          "name": None,
                           "start": to_dt(s["slice"].start),
                           "end": to_dt(s["slice"].stop),
-                          "kinds": s.get("kinds", []),
-                          "remarks": s.get("remarks", []),
+                          "kinds": [],
+                          "remarks": [],
+                          **{k: v for k, v in s.items() if k not in ["segment_id", "start", "end", "slice"]},
                          } for s in segments]
            }
