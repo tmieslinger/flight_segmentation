@@ -99,6 +99,24 @@ def ransac_fit_circle(lat, lon, distance_range=1e3, n=100):
     return fit_circle(lat[good], lon[good])
 
 
+def _attach_circle_fit(segment, ds):
+    if "circle" not in segment["kinds"]:
+        return segment
+
+    cdata = ds.sel(time=segment["slice"])
+    clat, clon, radius = ransac_fit_circle(cdata.lat.values, cdata.lon.values)
+    return {
+        **segment,
+        "clat": clat,
+        "clon": clon,
+        "radius": radius,
+    }
+
+
+def attach_circle_fit(segments, ds):
+    return [_attach_circle_fit(s, ds) for s in segments]
+
+
 def to_dt(dt64):
     import pandas as pd
     return pd.Timestamp(dt64).to_pydatetime(warn=False)
@@ -144,7 +162,7 @@ def parse_segment(segment):
     return seg
 
 def to_yaml(platform, flight_id, ds, segments, events):
-    segments = [parse_segment(s) for s in segments]
+    segments = attach_circle_fit([parse_segment(s) for s in segments], ds)
     takeoff, landing, _ = get_takeoff_landing(flight_id, ds)
     return {"mission": "ORCESTRA",
             "platform": platform,
