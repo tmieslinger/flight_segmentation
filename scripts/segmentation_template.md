@@ -34,6 +34,7 @@ from utils import get_sondes_l1, to_yaml, get_takeoff_landing
 ```python
 platform = "HALO"
 flight_id = "HALO-20240813a"
+location = "CAPE_VERDE"#"BARBADOS"
 ```
 
 ## Get HALO position and attitude
@@ -73,13 +74,29 @@ print("Landing time: " + str(landing))
 print(f"Flight duration: {int(duration / 60)}:{int(duration % 60)}")
 ```
 
+### Get EC track
+
+```python
+print(np.datetime_as_string(takeoff, unit='D'))
+```
+
+```python
+import orcestra.sat
+ec_fcst_time  = np.datetime_as_string(takeoff, unit='D')
+ec_track = orcestra.sat.SattrackLoader("EARTHCARE", ec_fcst_time, kind="PRE",roi=location) \
+    .get_track_for_day(ec_fcst_time)\
+    .sel(time=slice(f"{ec_fcst_time} 14:00", None))
+```
+
 ### Plot flight track and dropsonde locations
 
 ```python
-plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)))
-plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k")
+plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)), label="HALO track")
+plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k", label="dropsondes")
+plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted', label="EC track")
 plt.xlabel("longitude / °")
-plt.ylabel("latitude / °");
+plt.ylabel("latitude / °")
+plt.legend();
 ```
 
 ## Segments
@@ -206,8 +223,9 @@ print(f"Dropsonde launch times: {ds_drops.time.sel(time=seg_drops).values}")
 ```python
 seg = sl1
 plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)))
-plt.plot(ds.lon.sel(time=seg[0]), ds.lat.sel(time=seg[0]), color = 'red')
+plt.plot(ds.lon.sel(time=seg[0]), ds.lat.sel(time=seg[0]), color = 'red', zorder=10)
 plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k")
+plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted', label="EC track")
 plt.xlabel("longitude / °")
 plt.ylabel("latitude / °");
 ```
