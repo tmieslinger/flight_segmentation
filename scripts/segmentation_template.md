@@ -231,25 +231,27 @@ plt.ylabel("latitude / °");
 ```
 
 ## Events
-events are different from segments in having only **one** timestamp. Examples are the usual "EC meeting points" or station / ship overpasses. In general, events include a mandatory `event_id` and `time`, as well as optional statements on `name`, a list of `kinds` and a list of `remarks`. Possible `kinds`include:
+events are different from segments in having only **one** timestamp. Examples are the usual "EC meeting points" or station / ship overpasses. In general, events include a mandatory `event_id` and `time`, as well as optional statements on `name`, a list of `kinds`, the `distance` in meters, and a list of `remarks`. Possible `kinds`include:
 - `ec_underpass`
 - `meteor_overpass`
 - `bco_overpass`
 - `cvao_overpass`
 
-Typical `remarks` can be one string, e.g. "distance: ??m". An `event_id` will be added when saving it to YAML.
+The `event_id` will be added when saving it to YAML.
 
 ```python
 events = [
     {"name": "EC meeting point",
      "time": "2024-08-13", # this timestamp is a placeholder and should be replaced by a function that provides the closest meeting point and time
      "kinds": ["ec_underpass"],
-     "remarks": ["distance: ??m", "other potential comments"],
+     "distance": 325, # in meters from target
+     "remarks": ["potential comments"],
     },
     {"name": "test",
      "time": "2024-08-13T14:18:36",
      "kinds": ["meteor_overpass"],
-     "remarks": ["distance: 386m"]},
+     "distance": 123,
+     },
 ]
 ```
 
