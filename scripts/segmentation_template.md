@@ -32,6 +32,7 @@ from utils import get_sondes_l1, seg2yaml, get_takeoff_landing
 ```
 
 ```python
+platform = "HALO"
 flight_id = "HALO-20240813a"
 ```
 
@@ -214,7 +215,7 @@ plt.ylabel("latitude / °");
 ## Save segments to YAML file
 
 ```python
-yaml.dump(seg2yaml(flight_id, ds, segments),
+yaml.dump(seg2yaml(flight_id, ds, segments, platform),
           open(f"../flight_segment_files/{flight_id}.yaml", "w"),
           sort_keys=False)
 ```
