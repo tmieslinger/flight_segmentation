@@ -45,6 +45,78 @@ def plot_overpass(seg, ds, target_lat, target_lon):
     print(f"{d:.0f}m @ {t}")
     plt.show()
 
+
+def fit_circle(lat, lon):
+    """
+    Given a sequence of WGS84-Coordinates (lat and lon) on points along a circular path,
+    this function determines the center and radius of that circle.
+    """
+    from orcestra.flightplan import geod
+    from scipy.optimize import minimize
+    import numpy as np
+
+    lat = np.asarray(lat)
+    lon = np.asarray(lon)
+
+    clat = np.mean(lat)
+    clon = np.mean(lon)
+
+    def cost(x):
+        clat, clon = x
+        _, _, d = geod.inv(lon, lat, np.full_like(lon, clon), np.full_like(lat, clat))
+        return np.std(d)
+
+    res = minimize(cost, [clat, clon], method="Nelder-Mead")
+    clat, clon = res.x
+    _, _, d = geod.inv(lon, lat, np.full_like(lon, clon), np.full_like(lat, clat))
+    return float(clat), float(clon), float(np.mean(d))
+
+def ransac_fit_circle(lat, lon, distance_range=1e3, n=100):
+    """
+    Given a sequence of WGS84-Coordinates (lat and lon) on points along a circular path,
+    this function determines the center and radius of that circle.
+    """
+    import numpy as np
+    from orcestra.flightplan import geod
+
+    lat = np.asarray(lat)
+    lon = np.asarray(lon)
+
+    samples = []
+    for _ in range(n):
+        idxs = np.random.choice(len(lat), 3, replace=False)
+
+        clat, clon, radius = fit_circle(lat[idxs], lon[idxs])
+
+        _, _, d = geod.inv(lon, lat, np.full_like(lon, clon), np.full_like(lat, clat))
+        n_in = np.sum(np.abs(radius - d) <= distance_range)
+
+        samples.append((n_in, clat, clon, radius))
+
+    n_in_good, clat, clon, radius = sorted(samples)[-1]
+    _, _, d = geod.inv(lon, lat, np.full_like(lon, clon), np.full_like(lat, clat))
+    good = np.abs(radius - d) <= distance_range
+    return fit_circle(lat[good], lon[good])
+
+
+def _attach_circle_fit(segment, ds):
+    if "circle" not in segment["kinds"]:
+        return segment
+
+    cdata = ds.sel(time=segment["slice"])
+    clat, clon, radius = ransac_fit_circle(cdata.lat.values, cdata.lon.values)
+    return {
+        **segment,
+        "clat": clat,
+        "clon": clon,
+        "radius": radius,
+    }
+
+
+def attach_circle_fit(segments, ds):
+    return [_attach_circle_fit(s, ds) for s in segments]
+
+
 def to_dt(dt64):
     import pandas as pd
     return pd.Timestamp(dt64).to_pydatetime(warn=False)
@@ -90,7 +162,7 @@ def parse_segment(segment):
     return seg
 
 def to_yaml(platform, flight_id, ds, segments, events):
-    segments = [parse_segment(s) for s in segments]
+    segments = attach_circle_fit([parse_segment(s) for s in segments], ds)
     takeoff, landing, _ = get_takeoff_landing(flight_id, ds)
     return {"mission": "ORCESTRA",
             "platform": platform,
