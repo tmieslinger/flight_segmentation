@@ -231,7 +231,7 @@ plt.ylabel("latitude / °");
 ```
 
 ## Events
-events are different from segments in having only **one** timestamp. Examples are the usual "EC meeting points" or station / ship overpasses. Possible `kinds`include:
+events are different from segments in having only **one** timestamp. Examples are the usual "EC meeting points" or station / ship overpasses. In general, events include a mandatory `event_id` and `time`, as well as optional statements on `name`, a list of `kinds` and a list of `remarks`. Possible `kinds`include:
 - `ec_underpass`
 - `meteor_overpass`
 - `bco_overpass`

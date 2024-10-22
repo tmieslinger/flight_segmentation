@@ -70,7 +70,6 @@ def segment_hash(segment):
 
 def event_hash(event):
     import hashlib
-    print(event)
     return hashlib.sha256(f"{event["time"]}".encode("ascii")).hexdigest()[-4:]
 
 def parse_segment(segment):
