@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.14.5
+      jupytext_version: 1.16.4
   kernelspec:
     display_name: flight_segment
     language: python
@@ -15,22 +15,30 @@ jupyter:
 # Flight segmentation HALO-20240923a
 
 ```python
-import fsspec
+import matplotlib
+import yaml
+import hvplot.xarray
 import xarray as xr
 import numpy as np
 import pandas as pd
-import matplotlib
 import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
-import hvplot.xarray
 
-from navdata import get_navdata_HALO
+#import os
+#import sys
+#module_path = os.path.abspath(os.path.join('../scripts'))
+#if module_path not in sys.path:
+#    sys.path.append(module_path)
+
 from orcestra import bco
-from orcestra.flightplan import geod
+#from orcestra.flightplan import geod
+from navdata import get_navdata_HALO
+from utils import get_sondes_l1, to_yaml, get_takeoff_landing, plot_overpass, to_dt
 ```
 
 ```python
+platform = "HALO"
 flight_id = "HALO-20240923a"
+location = "BARBADOS" #"BARBADOS" or "CAPE_VERDE"
 ```
 
 ## Get HALO position and attitude
@@ -39,20 +47,7 @@ flight_id = "HALO-20240923a"
 ds = get_navdata_HALO(flight_id)
 ```
 
-## Get dropsonde data
-
-```python
-def get_sondes_l1(flight_id):
-    root = "ipns://latest.orcestra-campaign.org/products/HALO/dropsondes/Level_1"
-    day_folder = root + "/" + flight_id
-    fs = fsspec.filesystem(day_folder.split(":")[0])
-    filenames = fs.ls(day_folder, detail=False)
-    datasets = [xr.open_dataset(fsspec.open_local("simplecache::ipns://" + filename), engine="netcdf4")
-                for filename in filenames]
-    return np.array([d["launch_time"].values for d in datasets])
-```
-
-Reduce navigation dataset to dropsonde times
+## Get dropsonde launch times
 
 ```python
 drops = get_sondes_l1(flight_id)
@@ -70,30 +65,27 @@ ds["roll"].hvplot()
 ```
 
 ### Defining takeoff and landing
-Find the maximum altitude above WGS84 related to BCO airport:
+
+On Barbads, the airport runway plus bumps make HALO move between 7.8-8m above WGS84, on Sal between 88.2-88.4m above WGS84. We therefore define the flight time such that altitude must be above 9m on Barbados and 90m on Sal.
 
 ```python
-max(ds["alt"].sel(time=slice(None,"2024-09-23T11:13:20")).max().values,
-    ds["alt"].sel(time=slice("2024-09-23T20:06:30",None)).max().values)
-```
-
-Let's define everything above 10m altitude to belong to the flight time
-
-```python
-if ds.time[0].values > np.datetime64("2024-09-07T00:00:00"):
-    airport_wgs84 = 9
-else:
-    airport_wgs84 = 90
-```
-
-```python
-takeoff = ds["time"].where(ds.alt > airport_wgs84, drop=True)[0].values
-landing = ds["time"].where(ds.alt > airport_wgs84, drop=True)[-1].values
-duration = (landing - takeoff).astype("timedelta64[m]").astype(int)
+takeoff, landing, duration = get_takeoff_landing(flight_id, ds)
 print("take-off: ", takeoff)
 print("landing: ", landing)
-print(f"flight duration: {int(duration / 60)}:{int(duration % 60)}")
+print(f"flight duration (hh:mm): {int(duration / 60)}:{int(duration % 60)}")
 ```
+
+### Get EC track
+
+```python
+import orcestra.sat
+ec_fcst_time  = np.datetime_as_string(takeoff, unit='D')
+ec_track = orcestra.sat.SattrackLoader("EARTHCARE", ec_fcst_time, kind="PRE",roi=location) \
+    .get_track_for_day(ec_fcst_time)\
+    .sel(time=slice(f"{ec_fcst_time} 14:00", None))
+```
+
+### Plot flight track and dropsondes
 
 ```python
 fotos = [
@@ -103,14 +95,16 @@ fotos = [
     ]
 ```
 
-### Plot flight track and dropsondes
-
 ```python
-foto = True
+plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)), label="HALO track")
+plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k", label="dropsondes")
+plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted', label="EC track")
+plt.ylim([8, 15])
+plt.xlabel("longitude / °")
+plt.ylabel("latitude / °")
+plt.legend();
 
-plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)))
-plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k")
-
+foto = False
 if foto:
     for i in fotos:
         da_foto = ds.sel(time=i, method="nearest")
@@ -288,19 +282,14 @@ segments = [meteor1, seg2, seg3, seg4a, seg4b, seg4c, seg6, seg7, seg8, seg9, se
             seg21a, seg21b, seg21c, seg22, seg24]
 ```
 
-Quick plot for working my way through the segments
-
-```python
-fig, ax = plt.subplots()
-for seg in segments:
-    if seg[1][0]=="straight_leg":
-        print(
-        )
-    ax.plot(ds.lon.sel(time=seg[0]), ds.lat.sel(time=seg[0]))
-```
+### Quick plot for working your way through the segments piece by piece
+select the segment that you'd like to plot and optionally set the flag True for plotting the previous segment in your above specified list as well. The latter can be useful for the context if you have segments that are close or overlap in space, e.g. a leg crossing a circle.
 
 ```python
 seg=seg22
+add_previous_seg = False
+
+###########################
 
 fig = plt.figure(figsize=(12, 5))
 gs = fig.add_gridspec(2,2)
@@ -311,18 +300,15 @@ seg_drops = slice(pd.Timestamp(seg[0].start) - pd.Timedelta("3min"), pd.Timestam
 ax1.plot(ds.lon.sel(time=seg_drops), ds.lat.sel(time=seg_drops), "C0")
 
 # plot the previous segment as well as the chosen one
-if len(segments)>1:
-    seg_before = segments[segments.index(seg) - 1]
-    ax1.plot(ds.lon.sel(time=seg_before[0]), ds.lat.sel(time=seg_before[0]), color="grey")
+if add_previous_seg:
+    if segments.index(seg) > 0:
+        seg_before = segments[segments.index(seg) - 1]
+        ax1.plot(ds.lon.sel(time=seg_before[0]), ds.lat.sel(time=seg_before[0]), color="grey")
 ax1.plot(ds.lon.sel(time=seg[0]), ds.lat.sel(time=seg[0]), color="C1")
 
 # plot dropsonde markers for extended segment period as well as for the actually defined period
 ax1.scatter(ds_drops.lon.sel(time=seg_drops), ds_drops.lat.sel(time=seg_drops), c="C0")
 ax1.scatter(ds_drops.lon.sel(time=seg[0]), ds_drops.lat.sel(time=seg[0]), c="C1")
-
-# potentially also include markers for BCO or METEOR
-#plt.scatter(lonm, latm, c="r")
-#plt.scatter(bco.lon, bco.lat, c="orange")
 
 ax2 = fig.add_subplot(gs[0, 1])
 ds["alt"].sel(time=seg_drops).plot(ax=ax2, color="C0")
@@ -331,11 +317,8 @@ ds["alt"].sel(time=seg[0]).plot(ax=ax2, color="C1")
 ax3 = fig.add_subplot(gs[1, 1])
 ds["roll"].sel(time=seg_drops).plot(ax=ax3, color="C0")
 ds["roll"].sel(time=seg[0]).plot(ax=ax3, color="C1")
-```
 
-Check dropsonde launch times compared to the segment start and end times
-
-```python
+#Check dropsonde launch times compared to the segment start and end times
 print(f"Segment time: {seg[0].start} to {seg[0].stop}")
 print(f"Dropsonde launch times: {ds_drops.time.sel(time=seg_drops).values}")
 ```
@@ -344,25 +327,6 @@ print(f"Dropsonde launch times: {ds_drops.time.sel(time=seg_drops).values}")
 How far was the Meteor/BCO away from the HALO track?
 Possible overpasses within the first three segments and before landing.
 
-```python
-def get_overpass_info(seg, ds, target_lat, target_lon):
-    _, _, dist = geod.inv(ds.sel(time=seg).lon.values,
-                          ds.sel(time=seg).lat.values,
-                          np.full_like(ds.sel(time=seg).lon.values, target_lon),
-                          np.full_like(ds.sel(time=seg).lon.values, target_lat),
-                         )
-    i = np.argmin(dist)
-    return dist[i], ds.time.sel(time=seg).isel(time=i).values
-    
-def plot_overpass(seg, ds, target_lat, target_lon):
-    d, t = get_overpass_info(seg, ds, target_lat, target_lon)
-    plt.plot(ds.lon.sel(time=seg), ds.lat.sel(time=seg))
-    plt.scatter(ds.lon.sel(time=seg.start), ds.lat.sel(time=seg.start))
-    plt.scatter(target_lon, target_lat, c="C1")    
-    plt.plot([ds.lon.sel(time=t), target_lon], [ds.lat.sel(time=t), target_lat], color="C1")
-    print(f"{d:.0f}m @ {t}")
-    plt.show()
-```
 
 #### Plot Meteor overpasses
 
@@ -378,105 +342,76 @@ for seg in [seg1[0], seg24[0]]:
     plot_overpass(seg, ds, bco.lat, bco.lon)
 ```
 
+## Events
+events are different from segments in having only **one** timestamp. Examples are the usual "EC meeting points" or station / ship overpasses. In general, events include a mandatory `event_id` and `time`, as well as optional statements on `name`, a list of `kinds` and a list of `remarks`. Possible `kinds`include:
+- `ec_underpass`
+- `meteor_overpass`
+- `bco_overpass`
+- `cvao_overpass`
+
+Typical `remarks` can be one string, e.g. "distance: ??m". An `event_id` will be added when saving it to YAML.
+
+```python
+events = [{"name": "Meteor overpass 1",
+           "time": "2024-09-23T11:18:36",
+           "kinds": ["meteor_overpass"],
+           "distance": 386,
+          },
+           {"name": "Meteor overpass 2",
+            "time": "2024-09-23T11:54:01",
+           "kinds": ["meteor_overpass"],
+            "distance": 440,
+           },
+           {"name": "Meteor overpass 3",
+            "time": "2024-09-23T12:26:11",
+           "kinds": ["meteor_overpass"],
+            "distance": 936,
+           },
+           {"name": "Meteor overpass 4",
+            "time": "2024-09-23T19:52:13",
+           "kinds": ["meteor_overpass"],
+            "remarks": ["distance: 380m"]},
+           {"name": "passing by BCO",
+            "time": "2024-09-23T11:18:31",
+           "kinds": ["bco_overpass"],
+            "remarks": ["distance: 1225m"]},
+           {"name": "BCO overpass",
+            "time": "2024-09-23T19:56:59",
+            "kinds": ["bco_overpass"],
+            "remarks": ["distance: 363m"]},
+           {"name": "EC meeting point",
+            "time": "2024-09-23",
+            "kinds": ["ec_underpass"],
+            "remarks": ["sharp turn away from EC track right after meeting point due to deep convection"]},
+           ]
+```
+
 ## Parse info to YAML file
 
 ```python
-def parse_segment(segment):
-    if isinstance(segment, tuple):
-        seg = {
-            "slice": segment[0],
-        }
-        if len(segment) >= 2:
-            seg["kinds"] = segment[1]
-        if len(segment) >= 3:
-            seg["name"] = segment[2]
-        if len(segment) >= 4:
-            seg["irregularities"] = segment[3]
-    elif isinstance(segment, dict):
-        return segment
-    else:
-        seg = {"slice": segment}
-    return seg
-
-
-def segment_hash(segment):
-    import hashlib
-    return hashlib.sha256(f"{segment.start}+{segment.stop}".encode("ascii")).hexdigest()[-4:]
-
-def to_dt(dt64):
-    import pandas as pd
-    return pd.Timestamp(dt64).to_pydatetime(warn=False)
-
-def get_takeoff_landing(flight_id, ds):
-    """
-    Detect take-off and landing based on the airport on Sal
-    or Barbados which are located at 89m and 8m above WGS84 respectively.
-    """
-    if ds.time[0].values > np.datetime64("2024-09-07T00:00:00"):
-        airport_wgs84 = 9
-    else:
-        airport_wgs84 = 90
-    takeoff = ds["time"].where(ds.alt > airport_wgs84, drop=True)[0].values
-    landing = ds["time"].where(ds.alt > airport_wgs84, drop=True)[-1].values
-    duration = (landing - takeoff).astype("timedelta64[m]").astype(int)
-    return takeoff, landing, duration
-
-def seg2yaml(flight_id, ds, segments):
-    segments = [parse_segment(s) for s in segments]
-    takeoff, landing, _ = get_takeoff_landing(flight_id, ds)
-    return {"flight_id": flight_id,
-            "takeoff": to_dt(takeoff),
-            "landing": to_dt(landing),
-            "segments": [{"kinds": s.get("kinds", []),
-                          "name": s.get("name", None),
-                          "segment_id": f"{flight_id}_{segment_hash(s["slice"])}",
-                          "start": to_dt(s["slice"].start),
-                          "end": to_dt(s["slice"].stop),
-                          "irregularities": s.get("irregularities", []),
-                         } for s in segments]
-           }
-```
-
-```python
-takeoff, landing, _ = get_takeoff_landing(flight_id, ds)
-takeoff
-```
-
-```python
 header = {"nickname": "The pacman circles",
-          "mission": "ORCESTRA",
-          "platform": "HALO",
          }
 ```
 
 ```python
-events = [{"name": "Meteor overpass 1",
-            "time": to_dt("2024-09-23T11:18:36"),
-            "remark": "386m distance"},
-           {"name": "Meteor overpass 2",
-            "time": to_dt("2024-09-23T11:54:01"),
-            "remark": "440m distance"},
-           {"name": "Meteor overpass 3",
-            "time": to_dt("2024-09-23T12:26:11"),
-            "remark": "936m distance"},
-           {"name": "Meteor overpass 4",
-            "time": to_dt("2024-09-23T19:52:13"),
-            "remark": "380m distance"},
-           {"name": "passing by BCO",
-            "time": to_dt("2024-09-23T11:18:31"),
-            "remark": "1225m distance"},
-           {"name": "BCO overpass",
-            "time": to_dt("2024-09-23T19:56:59"),
-            "remark": "363m distance"},
-           {"name": "EC meeting point",
-            "time": None,
-            "remark": "sharp turn away from EC track right after meeting point due to deep convection"},
-           ]
+yaml.dump(to_yaml(platform, flight_id, ds, segments, events),
+          open(f"../flight_segment_files/{flight_id}.yaml", "w"),
+          sort_keys=False)
 ```
+
+## Import YAML and test it
 
 ```python
 import yaml
-yaml.dump(seg2yaml(flight_id, ds, segments), open(f"../flight_segment_files/{flight_id}.yaml", "w"), sort_keys=False)
+flightinfo = yaml.load(open("../flight_segment_files/HALO_20240813a.yaml"))
+```
+
+```python
+fig, ax = plt.subplots()
+for seg in segments:
+    if seg[1][0]=="straight_leg":
+        
+        ax.plot(ds.lon.sel(time=seg[0]), ds.lat.sel(time=seg[0]), color="C0")
 ```
 
 ```python
