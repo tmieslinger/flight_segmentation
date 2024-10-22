@@ -28,7 +28,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from navdata import get_navdata_HALO
-from utils import get_sondes_l1, seg2yaml, get_takeoff_landing
+from utils import get_sondes_l1, to_yaml, get_takeoff_landing
 ```
 
 ```python
@@ -212,10 +212,33 @@ plt.xlabel("longitude / °")
 plt.ylabel("latitude / °");
 ```
 
+## Events
+events are different from segments in having only **one** timestamp. Examples are the usual "EC meeting points" or station / ship overpasses. Possible `kinds`include:
+- `ec_underpass`
+- `meteor_overpass`
+- `bco_overpass`
+- `cvao_overpass`
+
+Typical `remarks` can be one string, e.g. "distance: ??m". An `event_id` will be added when saving it to YAML.
+
+```python
+events = [
+    {"name": "EC meeting point",
+     "time": "2024-08-13", # this timestamp is a placeholder and should be replaced by a function that provides the closest meeting point and time
+     "kinds": ["ec_underpass"],
+     "remarks": ["distance: ??m", "other potential comments"],
+    },
+    {"name": "test",
+     "time": "2024-08-13T14:18:36",
+     "kinds": ["meteor_overpass"],
+     "remarks": ["distance: 386m"]},
+]
+```
+
 ## Save segments to YAML file
 
 ```python
-yaml.dump(seg2yaml(flight_id, ds, segments, platform),
+yaml.dump(to_yaml(platform, flight_id, ds, segments, events),
           open(f"../flight_segment_files/{flight_id}.yaml", "w"),
           sort_keys=False)
 ```

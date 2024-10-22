@@ -7,6 +7,7 @@ __all__ = [
     "to_dt",
     "get_takeoff_landing",
     "segment_hash",
+    "event_hash",
     "parse_segment",
     "seg2yaml",
 ]
@@ -67,6 +68,11 @@ def segment_hash(segment):
     import hashlib
     return hashlib.sha256(f"{segment.start}+{segment.stop}".encode("ascii")).hexdigest()[-4:]
 
+def event_hash(event):
+    import hashlib
+    print(event)
+    return hashlib.sha256(f"{event["time"]}".encode("ascii")).hexdigest()[-4:]
+
 def parse_segment(segment):
     if isinstance(segment, tuple):
         seg = {
@@ -84,7 +90,7 @@ def parse_segment(segment):
         seg = {"slice": segment}
     return seg
 
-def seg2yaml(flight_id, ds, segments, platform):
+def to_yaml(platform, flight_id, ds, segments, events):
     segments = [parse_segment(s) for s in segments]
     takeoff, landing, _ = get_takeoff_landing(flight_id, ds)
     return {"mission": "ORCESTRA",
@@ -92,12 +98,17 @@ def seg2yaml(flight_id, ds, segments, platform):
             "flight_id": flight_id,
             "takeoff": to_dt(takeoff),
             "landing": to_dt(landing),
-            "segments": [{"kinds": s.get("kinds", []),
+            "events": [{"event_id": f"{flight_id}_{event_hash(e)}",
+                        "name": e.get("name", None),
+                        "time": to_dt(e["time"]),
+                        "kinds": e.get("kinds", []),
+                        "remarks": e.get("remarks", []),
+                        } for e in events],
+            "segments": [{"segment_id": f"{flight_id}_{segment_hash(s["slice"])}",
                           "name": s.get("name", None),
-                          "segment_id": f"{flight_id}_{segment_hash(s["slice"])}",
                           "start": to_dt(s["slice"].start),
                           "end": to_dt(s["slice"].stop),
-                          "irregularities": s.get("irregularities", []),
-                          "comments": s.get("comments", []),
+                          "kinds": s.get("kinds", []),
+                          "remarks": s.get("remarks", []),
                          } for s in segments]
            }
