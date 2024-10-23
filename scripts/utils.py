@@ -10,6 +10,7 @@ __all__ = [
     "event_hash",
     "parse_segment",
     "to_yaml",
+    "ransac_fit_circle",
 ]
 
 def get_sondes_l1(flight_id):
@@ -81,10 +82,11 @@ def ransac_fit_circle(lat, lon, distance_range=1e3, n=100):
 
     lat = np.asarray(lat)
     lon = np.asarray(lon)
+    rng = np.random.default_rng(12345)
 
     samples = []
     for _ in range(n):
-        idxs = np.random.choice(len(lat), 3, replace=False)
+        idxs = rng.choice(len(lat), 3, replace=False)
 
         clat, clon, radius = fit_circle(lat[idxs], lon[idxs])
 
