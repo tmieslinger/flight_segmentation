@@ -242,6 +242,12 @@ The EC underpass event can be added to a list of events via the function `ec_eve
 ```python
 events = [
     ec_event(ds, ec_track),
+    {"name": "example",
+     "kinds": ["cvao_overpass"],
+     "time": "2024-08-13T14:55:00",
+     "remarks": ["this is an example event", "it includes the distance to the target in meters"],
+     "distance": 123,
+    }
 ]
 events
 ```
