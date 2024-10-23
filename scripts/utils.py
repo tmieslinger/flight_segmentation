@@ -2,8 +2,8 @@
 
 __all__ = [
     "get_sondes_l1",
-    "get_overpass_info",
-    "plot_overpass",
+    "get_overpass_point",
+    "plot_overpass_point",
     "to_dt",
     "get_takeoff_landing",
     "segment_hash",
@@ -25,20 +25,20 @@ def get_sondes_l1(flight_id):
                 for filename in filenames]
     return np.array([d["launch_time"].values for d in datasets])
 
-def get_overpass_info(seg, ds, target_lat, target_lon):
+def get_overpass_point(ds, target_lat, target_lon):
     import numpy as np
     from orcestra.flightplan import geod
-    _, _, dist = geod.inv(ds.sel(time=seg).lon.values,
-                          ds.sel(time=seg).lat.values,
-                          np.full_like(ds.sel(time=seg).lon.values, target_lon),
-                          np.full_like(ds.sel(time=seg).lon.values, target_lat),
+    _, _, dist = geod.inv(ds.lon.values,
+                          ds.lat.values,
+                          np.full_like(ds.lon.values, target_lon),
+                          np.full_like(ds.lon.values, target_lat),
                          )
     i = np.argmin(dist)
-    return dist[i], ds.time.sel(time=seg).isel(time=i).values
+    return float(dist[i]), ds.time.sel(time=seg).values[i]
     
-def plot_overpass(seg, ds, target_lat, target_lon):
+def plot_overpass_point(seg, ds, target_lat, target_lon):
     import matplotlib.pyplot as plt
-    d, t = get_overpass_info(seg, ds, target_lat, target_lon)
+    d, t = get_overpass_point(ds.sel(time=seg), target_lat, target_lon)
     plt.plot(ds.lon.sel(time=seg), ds.lat.sel(time=seg))
     plt.scatter(ds.lon.sel(time=seg.start), ds.lat.sel(time=seg.start))
     plt.scatter(target_lon, target_lat, c="C1")    
