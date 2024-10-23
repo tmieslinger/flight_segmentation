@@ -37,7 +37,7 @@ def get_overpass_point(ds, target_lat, target_lon):
                           np.full_like(ds.lon.values, target_lat),
                          )
     i = np.argmin(dist)
-    return float(dist[i]), ds.time.sel(time=seg).values[i]
+    return float(dist[i]), ds.time.values[i]
     
 def plot_overpass_point(seg, ds, target_lat, target_lon):
     import matplotlib.pyplot as plt
