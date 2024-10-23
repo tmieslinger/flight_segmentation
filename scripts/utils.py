@@ -106,18 +106,18 @@ def flight_id2datestr(flight_id):
     return d[:4] + "-" + d[4:6] + "-" + d[6:]
 
 
-def get_ec_track(flight_id):
+def get_ec_track(flight_id, ds):
     import orcestra.sat
     import numpy as np
-
-    date  = flight_id2datestr(flight_id)
+    takeoff, landing, _ = get_takeoff_landing(flight_id, ds)
+    date = takeoff.astype("datetime64[D]")
     if np.datetime64(date) > np.datetime64("2024-09-07T00:00:00"):
         roi = "BARBADOS" # region of interest
     else:
         roi = "CAPE_VERDE"
     ec_track = orcestra.sat.SattrackLoader("EARTHCARE", date, kind="PRE",roi=roi) \
                                             .get_track_for_day(date)\
-                                            .sel(time=slice(f"{date} 14:00", None))
+                                            .sel(time=slice(takeoff, landing))
     return ec_track
 
 

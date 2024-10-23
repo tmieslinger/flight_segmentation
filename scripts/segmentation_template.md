@@ -66,7 +66,7 @@ print(f"Flight duration: {int(duration / 60)}:{int(duration % 60)}")
 ### Get EC track and EC meeting point
 
 ```python
-ec_track = get_ec_track(flight_id)
+ec_track = get_ec_track(flight_id, ds)
 dist_ec, t_ec = get_overpass_track(ds, ec_track)
 ```
 
