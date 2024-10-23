@@ -36,31 +36,18 @@ platform = "HALO"
 flight_id = "HALO-20240813a"
 ```
 
-## Get HALO position and attitude
+## Loading data
+### Get HALO position and attitude
 
 ```python
 ds = get_navdata_HALO(flight_id)
 ```
 
-## Get dropsonde launch times
+### Get dropsonde launch times
 
 ```python
 drops = get_sondes_l1(flight_id)
 ds_drops = ds.sel(time=drops, method="nearest")
-```
-
-## Interactive plots
-
-```python
-ds["alt"].hvplot()
-```
-
-```python
-ds["heading"].hvplot()
-```
-
-```python
-ds["roll"].hvplot()
 ```
 
 ### Defining takeoff and landing
@@ -90,6 +77,20 @@ plt.plot(ds.lon.sel(time=t_ec, method="nearest"), ds.lat.sel(time=t_ec, method="
 plt.xlabel("longitude / °")
 plt.ylabel("latitude / °")
 plt.legend();
+```
+
+## Interactive plots
+
+```python
+ds["alt"].hvplot()
+```
+
+```python
+ds["roll"].hvplot()
+```
+
+```python
+ds["heading"].hvplot()
 ```
 
 ## Segments
@@ -212,7 +213,7 @@ print(f"Segment time: {seg["slice"].start} to {seg["slice"].stop}")
 print(f"Dropsonde launch times: {ds_drops.time.sel(time=seg_drops).values}")
 ```
 
-## Identify visually which straight_leg segments lie on EC track
+### Identify visually which straight_leg segments lie on EC track
 
 ```python
 seg = parse_segment(ec1)
