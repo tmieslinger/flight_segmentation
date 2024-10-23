@@ -70,6 +70,12 @@ ec_track = get_ec_track(flight_id)
 dist_ec, t_ec = get_overpass_track(ds, ec_track)
 ```
 
+### Get PACE track
+
+```python
+pace_track = get_PACE_track(flight_id, ds)
+```
+
 ## Overview plot: HALO track, EC meeting point, and dropsonde locations
 
 ```python
@@ -77,6 +83,7 @@ plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff
 plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k", label="dropsondes")
 plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted')
 plt.plot(ds.lon.sel(time=t_ec, method="nearest"), ds.lat.sel(time=t_ec, method="nearest"), marker="*", ls=":", label="EC meeting point")
+plt.plot(pace_track.lon, pace_track.lat, c="C2", ls=":", label="PACE track")
 plt.xlabel("longitude / °")
 plt.ylabel("latitude / °")
 plt.legend();
@@ -226,6 +233,7 @@ plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k", label="dropsondes")
 plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted')
 plt.plot(ds.lon.sel(time=t_ec, method="nearest"), ds.lat.sel(time=t_ec, method="nearest"),
          marker="*", ls=":", label="EC meeting point", zorder=20)
+plt.plot(pace_track.lon, pace_track.lat, c="C2", ls=":", label="PACE track")
 plt.xlabel("longitude / °")
 plt.ylabel("latitude / °")
 plt.legend();
