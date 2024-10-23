@@ -76,6 +76,15 @@ dist_ec, t_ec = get_overpass_track(ds, ec_track)
 pace_track = get_PACE_track(flight_id, ds)
 ```
 
+### Get METEOR track
+select maybe only the track from the respective flight day
+
+```python
+from orcestra.meteor import get_meteor_track
+
+meteor_track = get_meteor_track().sel(time=slice(takeoff, landing))
+```
+
 ## Overview plot: HALO track, EC meeting point, and dropsonde locations
 
 ```python
@@ -84,6 +93,7 @@ plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k", label="dropsondes")
 plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted')
 plt.plot(ds.lon.sel(time=t_ec, method="nearest"), ds.lat.sel(time=t_ec, method="nearest"), marker="*", ls=":", label="EC meeting point")
 plt.plot(pace_track.lon, pace_track.lat, c="C2", ls=":", label="PACE track")
+plt.plot(meteor_track.lon, meteor_track.lat, c="C4", ls="-.", label="METEOR track")
 plt.xlabel("longitude / °")
 plt.ylabel("latitude / °")
 plt.legend();
