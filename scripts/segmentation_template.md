@@ -77,14 +77,16 @@ print(f"Flight duration: {int(duration / 60)}:{int(duration % 60)}")
 
 ```python
 ec_track = get_ec_track(flight_id)
+dist_ec, t_ec = get_overpass_track(ds, ec_track)
 ```
 
-### Plot flight track and dropsonde locations
+## Overview plot: HALO track, EC meeting point, and dropsonde locations
 
 ```python
 plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)), label="HALO track")
 plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k", label="dropsondes")
-plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted', label="EC track")
+plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted')
+plt.plot(ds.lon.sel(time=t_ec, method="nearest"), ds.lat.sel(time=t_ec, method="nearest"), marker="*", ls=":", label="EC meeting point")
 plt.xlabel("longitude / °")
 plt.ylabel("latitude / °")
 plt.legend();
@@ -213,13 +215,16 @@ print(f"Dropsonde launch times: {ds_drops.time.sel(time=seg_drops).values}")
 ## Identify visually which straight_leg segments lie on EC track
 
 ```python
-seg = parse_segment(sl1)
+seg = parse_segment(ec1)
 plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)))
-plt.plot(ds.lon.sel(time=seg["slice"]), ds.lat.sel(time=seg["slice"]), color='red', zorder=10)
-plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k")
-plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted', label="EC track")
+plt.plot(ds.lon.sel(time=seg["slice"]), ds.lat.sel(time=seg["slice"]), color='red', label="selected segment", zorder=10)
+plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k", label="dropsondes")
+plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted')
+plt.plot(ds.lon.sel(time=t_ec, method="nearest"), ds.lat.sel(time=t_ec, method="nearest"),
+         marker="*", ls=":", label="EC meeting point", zorder=20)
 plt.xlabel("longitude / °")
-plt.ylabel("latitude / °");
+plt.ylabel("latitude / °")
+plt.legend();
 ```
 
 ## Events

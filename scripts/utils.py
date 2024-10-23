@@ -4,6 +4,7 @@ __all__ = [
     "get_sondes_l1",
     "get_overpass_point",
     "plot_overpass_point",
+    "get_overpass_track",
     "get_ec_track",
     "to_dt",
     "get_takeoff_landing",
@@ -46,6 +47,45 @@ def plot_overpass_point(seg, ds, target_lat, target_lon):
     plt.plot([ds.lon.sel(time=t), target_lon], [ds.lat.sel(time=t), target_lat], color="C1")
     print(f"{d:.0f}m @ {t}")
     plt.show()
+
+def get_overpass_track(a_track, b_track, a_lon="lon", a_lat="lat", b_lon="lon", b_lat="lat", optimize=True):
+    """
+    Extract time and distance of closest point between two tracks given as datasets to the function.
+    Optionally, the lat and lon coordinate names of the respective datasets can be specified
+    if they are different from the default "lat" and "lon".
+    """
+    from orcestra.flightplan import geod
+    a = a_track.sel(time=slice(*b_track.time[[0, -1]]))
+    b = b_track.interp(time=a.time)
+    _, _, dist = geod.inv(b[b_lon], b[b_lat], a[a_lon], a[a_lat])
+    i = dist.argmin()
+
+    if optimize:
+        import numpy as np
+        from scipy.optimize import minimize
+
+        t_guess = a.time.values[i]
+        t_unit = np.timedelta64(1000_000_000, "ns")
+
+        _a = a.assign_coords(time=(a.time - t_guess) / t_unit)
+        _b = b.assign_coords(time=(b.time - t_guess) / t_unit)
+
+        def cost(t):
+            t = float(t[0])
+            a = _a.interp(time=t, method="linear")
+            b = _b.interp(time=t, method="linear")
+            _, _, dist = geod.inv(b[b_lon], b[b_lat], a[a_lon], a[a_lat])
+            return dist
+
+        res = minimize(cost, 0., method="Nelder-Mead")
+        t = float(res.x[0])
+        a = _a.interp(time=t, method="linear")
+        b = _b.interp(time=t, method="linear")
+        _, _, dist = geod.inv(b[b_lon], b[b_lat], a[a_lon], a[a_lat])
+        return float(dist), t_guess + t * t_unit
+    else:
+        return float(dist[i]), a.time.values[i]
+
 
 def flight_id2datestr(flight_id):
     d = flight_id.split("-")[1][:-1]
