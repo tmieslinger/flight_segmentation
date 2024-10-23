@@ -9,6 +9,7 @@ __all__ = [
     "get_ec_track",
     "ec_event",
     "meteor_event",
+    "target_event",
     "to_dt",
     "get_takeoff_landing",
     "segment_hash",
@@ -141,6 +142,37 @@ def meteor_event(ds, meteor_track, name=None, remarks=None):
             "remarks": remarks or [],
             "meteor_lat": float(meteor_track.interp(time=[meeting_time], method="linear").lat[0].values),
             "meteor_lon": float(meteor_track.interp(time=[meeting_time], method="linear").lon[0].values),
+           }
+
+
+def target_event(ds, target=None, target_lat=None, target_lon=None,
+                 name=None, kinds=None, remarks=None):
+    if target=="BCO":
+        from orcestra import bco
+        target_lat, target_lon = bco.lat, bco.lon
+        target_name = "BCO overpass"
+        target_kinds = ["bco_overpass"]
+
+    elif target=="CVAO":
+        from orcestra import mindelo
+        target_lat, target_lon = mindelo.lat, mindelo.lon
+        target_name = "CVAO overpass"
+        target_kinds = ["cvao_overpass"]
+
+    elif (target is None) and ((target_lat is None) or (target_lon is None)):
+        print("You need to specify either a target, i.e. BCO or CVAO, or a target_lat and target_lon")
+        return
+    else:
+        target_name = "target meeting point"
+        target_kinds = ["point_overpass"]
+
+    dist, time = get_overpass_point(ds, target_lat, target_lon)
+
+    return {"name": name or target_name,
+            "time": to_dt(time),
+            "kinds": kinds or target_kinds,
+            "distance": round(dist), #rounding to full meters
+            "remarks": remarks or [],
            }
 
 
