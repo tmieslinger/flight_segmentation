@@ -29,6 +29,9 @@ import matplotlib.pyplot as plt
 
 from navdata import get_navdata_HALO
 from utils import *
+
+from orcestra.flightplan import bco, mindelo
+cvao = mindelo
 ```
 
 ```python
