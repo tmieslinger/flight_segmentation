@@ -8,6 +8,7 @@ __all__ = [
     "get_overpass_track",
     "get_ec_track",
     "ec_event",
+    "meteor_event",
     "to_dt",
     "get_takeoff_landing",
     "segment_hash",
@@ -128,6 +129,18 @@ def ec_event(ds, ec_track, ec_remarks=None):
             "kinds": ["ec_underpass"],
             "distance": round(dist), #rounding to full meters
             "remarks": ec_remarks or [],
+           }
+
+
+def meteor_event(ds, meteor_track, name=None, remarks=None):
+    dist, meeting_time = get_overpass_track(ds, meteor_track)
+    return {"name": name or "METEOR overpass",
+            "time": to_dt(meeting_time),
+            "kinds": ["meteor_overpass"],
+            "distance": round(dist), #rounding to full meters
+            "remarks": remarks or [],
+            "meteor_lat": float(meteor_track.interp(time=[meeting_time], method="linear").lat[0].values),
+            "meteor_lon": float(meteor_track.interp(time=[meeting_time], method="linear").lon[0].values),
            }
 
 
