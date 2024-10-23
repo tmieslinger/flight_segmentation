@@ -28,13 +28,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from navdata import get_navdata_HALO
-from utils import get_sondes_l1, to_yaml, get_takeoff_landing, parse_segment
+from utils import *
 ```
 
 ```python
 platform = "HALO"
 flight_id = "HALO-20240813a"
-location = "CAPE_VERDE"#"BARBADOS"
 ```
 
 ## Get HALO position and attitude
@@ -74,18 +73,10 @@ print("Landing time: " + str(landing))
 print(f"Flight duration: {int(duration / 60)}:{int(duration % 60)}")
 ```
 
-### Get EC track
+### Get EC track and EC meeting point
 
 ```python
-print(np.datetime_as_string(takeoff, unit='D'))
-```
-
-```python
-import orcestra.sat
-ec_fcst_time  = np.datetime_as_string(takeoff, unit='D')
-ec_track = orcestra.sat.SattrackLoader("EARTHCARE", ec_fcst_time, kind="PRE",roi=location) \
-    .get_track_for_day(ec_fcst_time)\
-    .sel(time=slice(f"{ec_fcst_time} 14:00", None))
+ec_track = get_ec_track(flight_id)
 ```
 
 ### Plot flight track and dropsonde locations
