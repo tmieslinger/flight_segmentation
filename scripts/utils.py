@@ -6,6 +6,7 @@ __all__ = [
     "plot_overpass_point",
     "get_overpass_track",
     "get_ec_track",
+    "ec_event",
     "to_dt",
     "get_takeoff_landing",
     "segment_hash",
@@ -105,6 +106,17 @@ def get_ec_track(flight_id):
                                             .get_track_for_day(date)\
                                             .sel(time=slice(f"{date} 14:00", None))
     return ec_track
+
+
+def ec_event(ds, ec_track, ec_remarks=None):
+    dist, time = get_overpass_track(ds, ec_track)
+    return {"name": "EC meeting point",
+            "time": to_dt(time),
+            "kinds": ["ec_underpass"],
+            "distance": round(dist), #rounding to full meters
+            "remarks": ec_remarks or [],
+           }
+
 
 def fit_circle(lat, lon):
     """

@@ -236,23 +236,16 @@ events are different from segments in having only **one** timestamp. Examples ar
 
 The `event_id` will be added when saving it to YAML.
 
+The EC underpass event can be added to a list of events via the function `ec_event`.
+
 ```python
 events = [
-    {"name": "EC meeting point",
-     "time": "2024-08-13", # this timestamp is a placeholder and should be replaced by a function that provides the closest meeting point and time
-     "kinds": ["ec_underpass"],
-     "distance": 325, # in meters from target
-     "remarks": ["potential comments"],
-    },
-    {"name": "test",
-     "time": "2024-08-13T14:18:36",
-     "kinds": ["meteor_overpass"],
-     "distance": 123,
-     },
+    ec_event(ds, ec_track),
 ]
+events
 ```
 
-## Save segments to YAML file
+## Save segments and events to YAML file
 
 ```python
 yaml.dump(to_yaml(platform, flight_id, ds, segments, events),
