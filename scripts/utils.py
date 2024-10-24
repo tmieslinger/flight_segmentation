@@ -111,15 +111,24 @@ def flight_id2datestr(flight_id):
 def get_ec_track(flight_id, ds):
     import orcestra.sat
     import numpy as np
+    import warnings
     takeoff, landing, _ = get_takeoff_landing(flight_id, ds)
-    date = takeoff.astype("datetime64[D]")
-    if np.datetime64(date) > np.datetime64("2024-09-07T00:00:00"):
+    valid_date = takeoff.astype("datetime64[D]")
+    issue_dates = [valid_date - np.timedelta64(i, 'D') for i in range(0, 6)]
+    if np.datetime64(valid_date) > np.datetime64("2024-09-07T00:00:00"):
         roi = "BARBADOS" # region of interest
     else:
         roi = "CAPE_VERDE"
-    ec_track = orcestra.sat.SattrackLoader("EARTHCARE", date, kind="PRE",roi=roi) \
-                                            .get_track_for_day(date)\
-                                            .sel(time=slice(takeoff, landing))
+    for issue_date in issue_dates:
+        try:
+            ec_track = orcestra.sat.SattrackLoader(
+                "EARTHCARE", issue_date, kind="PRE",roi=roi
+            ).get_track_for_day(valid_date).sel(time=slice(takeoff, landing))
+            break
+        except:
+            warnings.warn("No sattrack forecast issued on flightday, " +
+                          "I will use an older sattrack forecast!")
+            continue
     return ec_track
 
 
