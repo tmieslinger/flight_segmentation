@@ -4,7 +4,7 @@
 
 _catalog_cache = {}
 
-def get_navdata_HALO(flight):
+def get_navdata_HALO(flight, hres=False):
     """
     :param flight: flight id
     """
@@ -12,7 +12,11 @@ def get_navdata_HALO(flight):
 
     #root = "ipns://latest.orcestra-campaign.org/products/HALO/position_attitude"
     root = "ipfs://QmP1ragFLB3jbjBj9tU3piitkADPqBUjqgydhcFjFGXrii"
-    return xr.open_dataset(f"{root}/{flight}.zarr", engine="zarr").reset_coords().resample(time="1s").mean()
+    if hres:
+        ds = xr.open_dataset(f"{root}/{flight}.zarr", engine="zarr").reset_coords()
+    else:
+        ds = xr.open_dataset(f"{root}/{flight}.zarr", engine="zarr").reset_coords().resample(time="1s").mean()
+    return ds
 
 NAVDATA_GETTERS = {
     "HALO": get_navdata_HALO,
