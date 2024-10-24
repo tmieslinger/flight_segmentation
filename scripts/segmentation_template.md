@@ -28,7 +28,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from navdata import get_navdata_HALO
-from utils import get_sondes_l1, seg2yaml, get_takeoff_landing
+from utils import *
+
+from orcestra.flightplan import bco, mindelo
+cvao = mindelo
 ```
 
 ```python
@@ -36,31 +39,18 @@ platform = "HALO"
 flight_id = "HALO-20240813a"
 ```
 
-## Get HALO position and attitude
+## Loading data
+### Get HALO position and attitude
 
 ```python
 ds = get_navdata_HALO(flight_id)
 ```
 
-## Get dropsonde launch times
+### Get dropsonde launch times
 
 ```python
 drops = get_sondes_l1(flight_id)
 ds_drops = ds.sel(time=drops, method="nearest")
-```
-
-## Interactive plots
-
-```python
-ds["alt"].hvplot()
-```
-
-```python
-ds["heading"].hvplot()
-```
-
-```python
-ds["roll"].hvplot()
 ```
 
 ### Defining takeoff and landing
@@ -73,22 +63,64 @@ print("Landing time: " + str(landing))
 print(f"Flight duration: {int(duration / 60)}:{int(duration % 60)}")
 ```
 
-### Plot flight track and dropsonde locations
+### Get EC track and EC meeting point
 
 ```python
-plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)))
-plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k")
+ec_track = get_ec_track(flight_id, ds)
+dist_ec, t_ec = get_overpass_track(ds, ec_track)
+```
+
+### Get PACE track
+
+```python
+pace_track = get_PACE_track(flight_id, ds)
+```
+
+### Get METEOR track
+select maybe only the track from the respective flight day
+
+```python
+from orcestra.meteor import get_meteor_track
+
+meteor_track = get_meteor_track().sel(time=slice(takeoff, landing))
+```
+
+## Overview plot: HALO track, EC meeting point, and dropsonde locations
+
+```python
+plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)), label="HALO track")
+plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k", label="dropsondes")
+plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted')
+plt.plot(ds.lon.sel(time=t_ec, method="nearest"), ds.lat.sel(time=t_ec, method="nearest"), marker="*", ls=":", label="EC meeting point")
+plt.plot(pace_track.lon, pace_track.lat, c="C2", ls=":", label="PACE track")
+plt.plot(meteor_track.lon, meteor_track.lat, c="C4", ls="-.", label="METEOR track")
 plt.xlabel("longitude / °")
-plt.ylabel("latitude / °");
+plt.ylabel("latitude / °")
+plt.legend();
+```
+
+## Interactive plots
+
+```python
+ds["alt"].hvplot()
+```
+
+```python
+ds["roll"].hvplot()
+```
+
+```python
+ds["heading"].hvplot()
 ```
 
 ## Segments
 
-defined as a tuple of time slice (`start`, `end`) , segment `kind`, `name`, `irregularities`, and `comments`.
+defined as a tuple of time slice (`start`, `end`) , segment `kind`, `name`, `remarks`.
 
 * in case of irregularities within a circle, 1 sec before the first and after the last sonde are chosen as start and end times
-* use the irregularities to state any deviations, also with respective times
-* use the comments field to state any further relevant information.
+* use the list of `remarks` to state any deviations, also with respective times
+
+Alternatively, you can also define the segments as dictionaries which also allows to add further attributes to single segments, e.g. a `radius` to a `circle` segment. At the end of the following code block all segments will be normalized by the `parse_segments` function.
 
 ```python
 sl1 = (
@@ -157,14 +189,14 @@ catr = (
 )
 
 # add all segments that you want to save to a yaml file later to the below list
-segments = [sl1, ec1, ec2, ec3, sl_south, c1, c2, c3, catr]
+segments = [parse_segment(s) for s in [sl1, ec1, ec2, ec3, sl_south, c1, c2, c3, catr]]
 ```
 
 ### Quick plot for working your way through the segments piece by piece
 select the segment that you'd like to plot and optionally set the flag True for plotting the previous segment in your above specified list as well. The latter can be useful for the context if you have segments that are close or overlap in space, e.g. a leg crossing a circle.
 
 ```python
-seg=c3
+seg=parse_segment(c3)
 add_previous_seg = False
 
 ###########################
@@ -174,48 +206,77 @@ gs = fig.add_gridspec(2,2)
 ax1 = fig.add_subplot(gs[:, 0])
 
 # extend the segment time period by 3min before and after to check outside dropsonde or roll angle conditions
-seg_drops = slice(pd.Timestamp(seg[0].start) - pd.Timedelta("3min"), pd.Timestamp(seg[0].stop) + pd.Timedelta("3min"))
+seg_drops = slice(pd.Timestamp(seg["slice"].start) - pd.Timedelta("3min"), pd.Timestamp(seg["slice"].stop) + pd.Timedelta("3min"))
 ax1.plot(ds.lon.sel(time=seg_drops), ds.lat.sel(time=seg_drops), "C0")
 
 # plot the previous segment as well as the chosen one
 if add_previous_seg:
     if segments.index(seg) > 0:
         seg_before = segments[segments.index(seg) - 1]
-        ax1.plot(ds.lon.sel(time=seg_before[0]), ds.lat.sel(time=seg_before[0]), color="grey")
-ax1.plot(ds.lon.sel(time=seg[0]), ds.lat.sel(time=seg[0]), color="C1")
+        ax1.plot(ds.lon.sel(time=seg_before["slice"]), ds.lat.sel(time=seg_before["slice"]), color="grey")
+ax1.plot(ds.lon.sel(time=seg["slice"]), ds.lat.sel(time=seg["slice"]), color="C1")
 
 # plot dropsonde markers for extended segment period as well as for the actually defined period
 ax1.scatter(ds_drops.lon.sel(time=seg_drops), ds_drops.lat.sel(time=seg_drops), c="C0")
-ax1.scatter(ds_drops.lon.sel(time=seg[0]), ds_drops.lat.sel(time=seg[0]), c="C1")
+ax1.scatter(ds_drops.lon.sel(time=seg["slice"]), ds_drops.lat.sel(time=seg["slice"]), c="C1")
 
 ax2 = fig.add_subplot(gs[0, 1])
 ds["alt"].sel(time=seg_drops).plot(ax=ax2, color="C0")
-ds["alt"].sel(time=seg[0]).plot(ax=ax2, color="C1")
+ds["alt"].sel(time=seg["slice"]).plot(ax=ax2, color="C1")
 
 ax3 = fig.add_subplot(gs[1, 1])
 ds["roll"].sel(time=seg_drops).plot(ax=ax3, color="C0")
-ds["roll"].sel(time=seg[0]).plot(ax=ax3, color="C1")
+ds["roll"].sel(time=seg["slice"]).plot(ax=ax3, color="C1")
 
 #Check dropsonde launch times compared to the segment start and end times
-print(f"Segment time: {seg[0].start} to {seg[0].stop}")
+print(f"Segment time: {seg["slice"].start} to {seg["slice"].stop}")
 print(f"Dropsonde launch times: {ds_drops.time.sel(time=seg_drops).values}")
 ```
 
-## Identify visually which straight_leg segments lie on EC track
+### Identify visually which straight_leg segments lie on EC track
 
 ```python
-seg = sl1
+seg = parse_segment(ec1)
 plt.plot(ds.lon.sel(time=slice(takeoff, landing)), ds.lat.sel(time=slice(takeoff, landing)))
-plt.plot(ds.lon.sel(time=seg[0]), ds.lat.sel(time=seg[0]), color = 'red')
-plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k")
+plt.plot(ds.lon.sel(time=seg["slice"]), ds.lat.sel(time=seg["slice"]), color='red', label="selected segment", zorder=10)
+plt.scatter(ds_drops.lon, ds_drops.lat, s=10, c="k", label="dropsondes")
+plt.plot(ec_track.lon, ec_track.lat, c='C1', ls='dotted')
+plt.plot(ds.lon.sel(time=t_ec, method="nearest"), ds.lat.sel(time=t_ec, method="nearest"),
+         marker="*", ls=":", label="EC meeting point", zorder=20)
+plt.plot(pace_track.lon, pace_track.lat, c="C2", ls=":", label="PACE track")
 plt.xlabel("longitude / °")
-plt.ylabel("latitude / °");
+plt.ylabel("latitude / °")
+plt.legend();
 ```
 
-## Save segments to YAML file
+## Events
+events are different from segments in having only **one** timestamp. Examples are the usual "EC meeting points" or station / ship overpasses. In general, events include a mandatory `event_id` and `time`, as well as optional statements on `name`, a list of `kinds`, the `distance` in meters, and a list of `remarks`. Possible `kinds`include:
+- `ec_underpass`
+- `meteor_overpass`
+- `bco_overpass`
+- `cvao_overpass`
+
+The `event_id` will be added when saving it to YAML.
+
+The EC underpass event can be added to a list of events via the function `ec_event`.
 
 ```python
-yaml.dump(seg2yaml(flight_id, ds, segments, platform),
+events = [
+    ec_event(ds, ec_track),
+    {"name": "example",
+     "kinds": ["cvao_overpass"],
+     "time": "2024-08-13T14:55:00",
+     "remarks": ["this is an example event", "it includes the distance to the target in meters"],
+     "distance": 123,
+    }
+]
+events
+```
+
+## Save segments and events to YAML file
+
+```python
+yaml.dump(to_yaml(platform, flight_id, ds, segments, events),
           open(f"../flight_segment_files/{flight_id}.yaml", "w"),
           sort_keys=False)
 ```
