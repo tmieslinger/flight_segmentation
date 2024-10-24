@@ -71,9 +71,17 @@ dist_ec, t_ec = get_overpass_track(ds, ec_track)
 ```
 
 ### Get PACE track
+**loading the PACE track for the first time takes 6-7 minutes!**
+Might be worth only if the flight report states a PACE coordination.
 
 ```python
-pace_track = get_PACE_track(flight_id, ds)
+from get_pace import get_pace_track
+_pace_track = get_pace_track(to_dt(takeoff), to_dt(landing))
+
+pace_track = _pace_track.where(
+        (_pace_track.lat > ds.lat.min()-2) & (_pace_track.lat < ds.lat.max()+2) &
+        (_pace_track.lon > ds.lon.min()-2) & (_pace_track.lon < ds.lon.max()+2),
+        drop=True)
 ```
 
 ### Get METEOR track
